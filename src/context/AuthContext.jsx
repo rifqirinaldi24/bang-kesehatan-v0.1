@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { authenticateUser } from '../data/userStore';
+import { getRolePermissions, hasPermission as checkPermission } from '../data/permissionStore';
 
 const AuthContext = createContext();
 
@@ -7,7 +9,7 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check local storage for mock session
+    // Check local storage for existing session
     const storedUser = localStorage.getItem('bk_admin_user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -16,24 +18,20 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    // Mock authentication
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        if (email === 'admin@bangkesehatan.com' && password === 'admin123') {
-          const userData = {
-            id: 1,
-            name: 'Admin Sistem',
-            email: 'admin@bangkesehatan.com',
-            role: 'admin',
-            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCCPTVDfr0psFb6PDJAR8rSrK7Cw-XtFbli4d8hRha0EmlpVRfaYAziy8jaL4OQtf2EQgGXEhwi-RMXkmKD_ht5vEO3Z4U5GUYh0qOSNiOB4mP_wySNXpnK7hciPgyHTEgsGvgsETUJycq1LQvwYhOpOB6nwJT4Qvlz9vfjdLGmfcVUpP-q3gUYSkbY1yz6naWwDM5aT-5m91msv1fWfQD0n3S8GgFqU2S4ja7GpqtiwSBkIS2Ptj2fD7h4k645bg-IQZ4xoQksqfI'
-          };
-          setUser(userData);
-          localStorage.setItem('bk_admin_user', JSON.stringify(userData));
-          resolve(userData);
-        } else {
-          reject(new Error('Email atau password salah.'));
+        try {
+          const userData = authenticateUser(email, password);
+          // Ambil permissions berdasarkan role
+          const permissions = getRolePermissions(userData.role);
+          const fullUser = { ...userData, permissions };
+          setUser(fullUser);
+          localStorage.setItem('bk_admin_user', JSON.stringify(fullUser));
+          resolve(fullUser);
+        } catch (error) {
+          reject(error);
         }
-      }, 800); // simulate network delay
+      }, 500);
     });
   };
 
@@ -42,8 +40,25 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('bk_admin_user');
   };
 
+  // Refresh permissions dari permissionStore (untuk saat Superuser mengubah role config)
+  const refreshPermissions = () => {
+    if (user) {
+      const permissions = getRolePermissions(user.role);
+      const updatedUser = { ...user, permissions };
+      setUser(updatedUser);
+      localStorage.setItem('bk_admin_user', JSON.stringify(updatedUser));
+    }
+  };
+
+  // Helper: cek apakah user punya permission tertentu
+  const hasPermission = (permissionKey) => {
+    if (!user) return false;
+    if (user.role === 'superuser') return true; // Superuser selalu punya semua akses
+    return checkPermission(user.role, permissionKey);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, hasPermission, refreshPermissions }}>
       {children}
     </AuthContext.Provider>
   );

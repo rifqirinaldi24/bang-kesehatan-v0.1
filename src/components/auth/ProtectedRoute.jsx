@@ -1,8 +1,8 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-export default function ProtectedRoute() {
-  const { user, isLoading } = useAuth();
+export default function ProtectedRoute({ requiredPermission }) {
+  const { user, isLoading, hasPermission } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -13,9 +13,14 @@ export default function ProtectedRoute() {
     );
   }
 
+  // Belum login → redirect ke Login
   if (!user) {
-    // Redirect them to the /cms/login page, but save the current location they were trying to go to
     return <Navigate to="/cms/login" state={{ from: location }} replace />;
+  }
+
+  // Punya permission requirement tapi user tidak punya akses → 403
+  if (requiredPermission && !hasPermission(requiredPermission)) {
+    return <Navigate to="/cms/access-denied" replace />;
   }
 
   return <Outlet />;

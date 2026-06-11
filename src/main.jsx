@@ -11,6 +11,9 @@ import CMSLayout from './components/cms/CMSLayout.jsx';
 import LoginPage from './pages/cms/LoginPage.jsx';
 import DashboardPage from './pages/cms/DashboardPage.jsx';
 import ArticleEditorPage from './pages/cms/ArticleEditorPage.jsx';
+import UserDirectoryPage from './pages/cms/UserDirectoryPage.jsx';
+import RoleManagerPage from './pages/cms/RoleManagerPage.jsx';
+import AccessDeniedPage from './pages/cms/AccessDeniedPage.jsx';
 import './index.css';
 
 createRoot(document.getElementById('root')).render(
@@ -27,14 +30,33 @@ createRoot(document.getElementById('root')).render(
             
             {/* CMS Public Routes */}
             <Route path="/cms/login" element={<LoginPage />} />
+
+            {/* CMS Access Denied (inside CMS layout) */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/cms/access-denied" element={<CMSLayout />}>
+                <Route index element={<AccessDeniedPage />} />
+              </Route>
+            </Route>
             
-            {/* CMS Protected Routes */}
+            {/* CMS Protected Routes — General (semua user login) */}
             <Route element={<ProtectedRoute />}>
               <Route path="/cms" element={<CMSLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="editor" element={<ArticleEditorPage />} />
-                {/* Fallback for other CMS routes */}
-                <Route path="*" element={<DashboardPage />} />
+              </Route>
+            </Route>
+
+            {/* CMS Protected Routes — User Directory (butuh manage_users) */}
+            <Route element={<ProtectedRoute requiredPermission="manage_users" />}>
+              <Route path="/cms" element={<CMSLayout />}>
+                <Route path="users" element={<UserDirectoryPage />} />
+              </Route>
+            </Route>
+
+            {/* CMS Protected Routes — Role Manager (butuh manage_roles) */}
+            <Route element={<ProtectedRoute requiredPermission="manage_roles" />}>
+              <Route path="/cms" element={<CMSLayout />}>
+                <Route path="roles" element={<RoleManagerPage />} />
               </Route>
             </Route>
           </Routes>

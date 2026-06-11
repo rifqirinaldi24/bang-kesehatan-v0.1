@@ -3,21 +3,27 @@ import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
 
 export default function CMSSidebar({ collapsed, setCollapsed }) {
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const location = useLocation();
 
-  const navItems = [
-    { name: 'Dashboard', path: '/cms', icon: 'dashboard' },
-    { name: 'Content Manager', path: '/cms/editor', icon: 'edit_square' },
-    { name: 'AI Generation', path: '/cms/ai', icon: 'auto_awesome' },
-    { name: 'User Directory', path: '/cms/users', icon: 'group' },
-    { name: 'Analytics', path: '/cms/analytics', icon: 'bar_chart' },
+  // Menu items dengan permission key
+  const allNavItems = [
+    { name: 'Dashboard', path: '/cms', icon: 'dashboard', permission: 'dashboard' },
+    { name: 'Content Manager', path: '/cms/editor', icon: 'edit_square', permission: 'editor' },
+    { name: 'AI Generation', path: '/cms/ai', icon: 'auto_awesome', permission: 'ai_generator' },
+    { name: 'User Directory', path: '/cms/users', icon: 'group', permission: 'manage_users' },
+    { name: 'Analytics', path: '/cms/analytics', icon: 'bar_chart', permission: 'analytics' },
   ];
 
-  const bottomNavItems = [
-    { name: 'Settings', path: '/cms/settings', icon: 'settings' },
-    { name: 'System Status', path: '/cms/status', icon: 'check_circle' },
+  const allBottomNavItems = [
+    { name: 'Role Manager', path: '/cms/roles', icon: 'admin_panel_settings', permission: 'manage_roles' },
+    { name: 'Settings', path: '/cms/settings', icon: 'settings', permission: 'settings' },
+    { name: 'System Status', path: '/cms/status', icon: 'check_circle', permission: null },
   ];
+
+  // Filter berdasarkan permission
+  const navItems = allNavItems.filter(item => !item.permission || hasPermission(item.permission));
+  const bottomNavItems = allBottomNavItems.filter(item => !item.permission || hasPermission(item.permission));
 
   return (
     <nav 
@@ -89,16 +95,24 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
 
       {/* Bottom Actions */}
       <div className="border-t border-border-muted p-3 flex flex-col gap-1">
-        {bottomNavItems.map((item) => (
-          <button 
-            key={item.name}
-            className={`flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all duration-200 rounded-lg group ${collapsed ? 'justify-center' : ''}`}
-            title={collapsed ? item.name : undefined}
-          >
-            <span className="material-symbols-outlined group-hover:rotate-45 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>{item.icon}</span>
-            {!collapsed && <span className="font-label-md text-sm whitespace-nowrap">{item.name}</span>}
-          </button>
-        ))}
+        {bottomNavItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <Link
+              key={item.name}
+              to={item.path}
+              className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-200 rounded-lg group ${collapsed ? 'justify-center' : ''} ${
+                isActive
+                  ? 'text-primary bg-primary-fixed/30 font-medium'
+                  : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+              }`}
+              title={collapsed ? item.name : undefined}
+            >
+              <span className="material-symbols-outlined group-hover:rotate-45 transition-transform" style={{ fontVariationSettings: "'FILL' 0" }}>{item.icon}</span>
+              {!collapsed && <span className="font-label-md text-sm whitespace-nowrap">{item.name}</span>}
+            </Link>
+          );
+        })}
 
         <button
           onClick={logout}

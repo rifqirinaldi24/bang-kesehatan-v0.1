@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Implementation Plan — User Directory & RBAC | Bang Kesehatan v0.1</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --primary: #0D7C66;
+      --primary-light: #E8F5E9;
+      --dark: #1a1a2e;
+      --text: #2d3748;
+      --text-light: #718096;
+      --border: #e2e8f0;
+      --bg: #ffffff;
+      --bg-alt: #f7fafc;
+      --gold: #D4A843;
+      --blue: #3B82F6;
+      --green: #10B981;
+      --purple: #8B5CF6;
+      --red: #EF4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      line-height: 1.7;
+      background: var(--bg);
+      font-size: 11pt;
+    }
+
+    .page {
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 25mm 20mm;
+    }
+
+    @media print {
+      .page { padding: 15mm; }
+      .page-break { page-break-before: always; }
+      body { font-size: 10pt; }
+    }
+
+    /* Cover Header */
+    .cover-header {
+      text-align: center;
+      padding: 40px 0 30px;
+      border-bottom: 3px solid var(--primary);
+      margin-bottom: 40px;
+    }
+    .cover-header .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .cover-header .logo-icon {
+      width: 48px; height: 48px;
+      background: var(--primary);
+      color: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 24px;
+    }
+    .cover-header .logo-text {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .cover-header h1 {
+      font-size: 22pt;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .cover-header .subtitle {
+      font-size: 12pt;
+      color: var(--text-light);
+      font-weight: 400;
+    }
+    .cover-meta {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+      font-size: 9pt;
+      color: var(--text-light);
+    }
+    .cover-meta strong { color: var(--text); }
+
+    /* Section Headers */
+    h2 {
+      font-size: 16pt;
+      font-weight: 700;
+      color: var(--dark);
+      margin: 35px 0 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h3 {
+      font-size: 12pt;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 25px 0 10px;
+    }
+    h4 {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--text);
+      margin: 15px 0 8px;
+    }
+
+    p { margin-bottom: 10px; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0 20px;
+      font-size: 9.5pt;
+    }
+    th {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 12px;
+    }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: var(--bg-alt); }
+    tr:hover td { background: #edf2f7; }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 8pt;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .badge-gold { background: #FEF3C7; color: #92400E; }
+    .badge-blue { background: #DBEAFE; color: #1E40AF; }
+    .badge-green { background: #D1FAE5; color: #065F46; }
+    .badge-purple { background: #EDE9FE; color: #5B21B6; }
+
+    /* Flow boxes */
+    .flow-container {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 15px 0 20px;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .flow-step:last-child { margin-bottom: 0; }
+    .flow-number {
+      width: 28px; height: 28px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 9pt;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .flow-content { flex: 1; }
+    .flow-content strong { color: var(--dark); }
+    .flow-arrow {
+      text-align: center;
+      color: var(--primary);
+      font-size: 16pt;
+      margin: -5px 0;
+      padding-left: 8px;
+    }
+
+    /* Info boxes */
+    .info-box {
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-size: 9.5pt;
+    }
+    .info-box.note {
+      background: #EBF5FF;
+      border-left: 4px solid var(--blue);
+    }
+    .info-box.warning {
+      background: #FFF7ED;
+      border-left: 4px solid #F59E0B;
+    }
+    .info-box.success {
+      background: #ECFDF5;
+      border-left: 4px solid var(--green);
+    }
+    .info-box strong { display: block; margin-bottom: 4px; }
+
+    /* Code block */
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 9pt;
+      margin: 10px 0 15px;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+    .code-block .comment { color: #64748b; }
+    .code-block .keyword { color: #38bdf8; }
+    .code-block .string { color: #4ade80; }
+
+    /* Toggle visual */
+    .toggle-on {
+      display: inline-block;
+      width: 18px; height: 18px;
+      background: var(--green);
+      border-radius: 4px;
+      text-align: center;
+      line-height: 18px;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    .toggle-off {
+      display: inline-block;
+      width: 18px; height: 18px;
+      background: #E5E7EB;
+      border-radius: 4px;
+      text-align: center;
+      line-height: 18px;
+      color: #9CA3AF;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    .lock { font-size: 8px; }
+
+    /* File list */
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 6px 0;
+      font-size: 9.5pt;
+    }
+    .file-badge-new {
+      background: var(--green); color: white;
+      padding: 1px 8px; border-radius: 4px;
+      font-size: 7.5pt; font-weight: 700;
+    }
+    .file-badge-mod {
+      background: var(--blue); color: white;
+      padding: 1px 8px; border-radius: 4px;
+      font-size: 7.5pt; font-weight: 700;
+    }
+    .file-name { font-family: 'Consolas', monospace; font-weight: 500; }
+    .file-desc { color: var(--text-light); margin-left: auto; font-size: 8.5pt; }
+
+    /* Checklist */
+    .checklist { list-style: none; padding: 0; }
+    .checklist li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 9.5pt;
+    }
+    .check-box {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: 50px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 8pt;
+      color: var(--text-light);
+    }
+
+    /* Hierarchy diagram */
+    .hierarchy {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin: 20px 0;
+    }
+    .role-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 10pt;
+      border: 2px solid;
+    }
+    .role-card.su { background: #FEF3C7; border-color: var(--gold); color: #92400E; }
+    .role-card.ad { background: #DBEAFE; border-color: var(--blue); color: #1E40AF; }
+    .role-card.ed { background: #D1FAE5; border-color: var(--green); color: #065F46; }
+    .role-card.wr { background: #EDE9FE; border-color: var(--purple); color: #5B21B6; }
+    .hierarchy-arrow {
+      font-size: 18px;
+      color: var(--text-light);
+      margin: -2px 0;
+    }
+    .hierarchy-row {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    /* Mermaid diagrams */
+    .mermaid {
+      margin: 20px 0;
+      text-align: center;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+  </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+  </script>
+</head>
+<body>
+  <div class="page">
+
+    <!-- ============ COVER ============ -->
+    <div class="cover-header">
+      <div class="logo">
+        <div class="logo-icon">B</div>
+        <div class="logo-text">Bang Kesehatan</div>
+      </div>
+      <h1>Implementation Plan</h1>
+      <p class="subtitle">User Directory & Role-Based Access Control (RBAC)</p>
+      <div class="cover-meta">
+        <span><strong>Versi:</strong> 0.1</span>
+        <span><strong>Tanggal:</strong> 11 Juni 2026</span>
+        <span><strong>Disusun oleh:</strong> AI Development Team</span>
+        <span><strong>Status:</strong> ✅ Approved</span>
+      </div>
+    </div>
+
+    <!-- ============ DAFTAR ISI ============ -->
+    <h2>📑 Daftar Isi</h2>
+    <ol style="font-size: 10pt; line-height: 2.2; padding-left: 20px;">
+      <li>Ringkasan Eksekutif</li>
+      <li>Arsitektur Sistem & Hierarki Peran</li>
+      <li>Permission Matrix (Parameterized per Role)</li>
+      <li>Field Data User</li>
+      <li>User Flow Lengkap</li>
+      <li>Rincian Perubahan File</li>
+      <li>Rencana Verifikasi</li>
+    </ol>
+
+    <!-- ============ 1. RINGKASAN ============ -->
+    <h2>1. Ringkasan Eksekutif</h2>
+    <p>
+      Saat ini, sistem CMS Bang Kesehatan menggunakan satu akun login yang ter-<em>hardcode</em> di dalam kode sumber. 
+      Dokumen ini merancang sistem <strong>User Directory</strong> lengkap dengan hierarki 4 peran (<em>Superuser, Admin, Editor, Writer</em>) 
+      dan kontrol akses berbasis peran (<em>Role-Based Access Control / RBAC</em>) yang <strong>dapat dikonfigurasi secara dinamis</strong> 
+      melalui antarmuka visual — tanpa perlu mengubah kode program.
+    </p>
+
+    <div class="info-box success">
+      <strong>✅ Pendekatan: Parameterized per Role</strong>
+      Permission setiap role dapat diubah kapan saja oleh Superuser melalui halaman "Role Manager". 
+      Perubahan langsung berlaku untuk semua user yang memiliki role tersebut.
+    </div>
+
+    <!-- ============ 2. ARSITEKTUR ============ -->
+    <h2>2. Arsitektur Sistem & Hierarki Peran</h2>
+
+    <h3>2.1 Hierarki 4 Peran</h3>
+
+    <div class="mermaid">
+    graph TD
+      SU["SUPERUSER<br/>Akses Penuh + Kelola Sistem"]
+      AD["ADMIN<br/>Kelola Konten + Tambah User"]
+      ED["EDITOR<br/>Tulis + Review + Publish"]
+      WR["WRITER<br/>Tulis Draft Saja"]
+      SU -->|mengelola| AD
+      SU -->|mengelola| ED
+      SU -->|mengelola| WR
+      AD -->|menambah| ED
+      AD -->|menambah| WR
+      style SU fill:#FEF3C7,stroke:#D4A843,color:#92400E,stroke-width:2px
+      style AD fill:#DBEAFE,stroke:#3B82F6,color:#1E40AF,stroke-width:2px
+      style ED fill:#D1FAE5,stroke:#10B981,color:#065F46,stroke-width:2px
+      style WR fill:#EDE9FE,stroke:#8B5CF6,color:#5B21B6,stroke-width:2px
+    </div>
+
+    <h3>2.2 Arsitektur Data & Komponen</h3>
+
+    <div class="mermaid">
+    graph LR
+      subgraph DATA["Data Layer"]
+        US["userStore.js<br/>CRUD User"]
+        PM["permissionStore.js<br/>Permission Matrix"]
+      end
+      subgraph AUTH["Auth Layer"]
+        AC["AuthContext.jsx<br/>Login + hasPermission"]
+        PR["ProtectedRoute.jsx<br/>Route Guard + 403"]
+      end
+      subgraph UI["UI Layer"]
+        UD["UserDirectoryPage.jsx<br/>Tabel + CRUD User"]
+        RM["RoleManagerPage.jsx<br/>Toggle Permission"]
+        SB["CMSSidebar.jsx<br/>Dynamic Menu"]
+      end
+      US --> AC
+      PM --> AC
+      AC --> PR
+      AC --> SB
+      PR --> UD
+      PR --> RM
+      style DATA fill:#ECFDF5,stroke:#10B981
+      style AUTH fill:#EBF5FF,stroke:#3B82F6
+      style UI fill:#FEF3C7,stroke:#D4A843
+    </div>
+
+    <h3>2.2 Deskripsi Peran</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:15%">Peran</th>
+          <th style="width:30%">Deskripsi</th>
+          <th>Hak Akses</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-gold">SUPERUSER</span></td>
+          <td>Pemilik sistem. Hanya 1 orang. Tidak bisa dihapus.</td>
+          <td>Semua fitur CMS tanpa batas. Mengelola User Directory, menambah/hapus user, mengubah role user lain, dan mengonfigurasi permission.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">ADMIN</span></td>
+          <td>Kepala Redaksi / Manager.</td>
+          <td>Semua fitur konten (Dashboard, Editor, AI Generator, Analytics). Bisa menambah user Writer/Editor. <strong>Tidak bisa</strong> menghapus Superuser atau mengakses Role Manager.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">EDITOR</span></td>
+          <td>Penyunting/penulis senior.</td>
+          <td>Bisa menggunakan Content Editor, AI Generator, dan meng-<em>approve</em> (Publish) artikel. <strong>Tidak bisa</strong> mengelola user.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">WRITER</span></td>
+          <td>Penulis/kontributor.</td>
+          <td>Hanya bisa membuat artikel baru (Draft). <strong>Tidak bisa</strong> mempublish dan tidak bisa mengakses Analytics/User Directory.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ============ 3. PERMISSION MATRIX ============ -->
+    <div class="page-break"></div>
+    <h2>3. Permission Matrix (Parameterized per Role)</h2>
+    <p>
+      Tabel di bawah ini adalah konfigurasi <em>default</em> yang akan ditanam saat pertama kali sistem dijalankan.
+      Superuser dapat mengubah semua toggle ini kapan pun dari halaman <strong>Role Manager</strong>, 
+      kecuali kolom Superuser yang dikunci permanen.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Permission Key</th>
+          <th>Label di UI</th>
+          <th style="text-align:center"><span class="badge badge-gold">Superuser</span></th>
+          <th style="text-align:center"><span class="badge badge-blue">Admin</span></th>
+          <th style="text-align:center"><span class="badge badge-green">Editor</span></th>
+          <th style="text-align:center"><span class="badge badge-purple">Writer</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>dashboard</code></td>
+          <td>Dashboard</td>
+          <td style="text-align:center"><span class="toggle-on">✓</span> <span class="lock">🔒</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+        </tr>
+        <tr>
+          <td><code>editor</code></td>
+          <td>Content Manager</td>
+          <td style="text-align:center"><span class="toggle-on">✓</span> <span class="lock">🔒</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+        </tr>
+        <tr>
+          <td><code>ai_generator</code></td>
+          <td>AI Generator</td>
+          <td style="text-align:center"><span class="toggle-on">✓</span> <span class="lock">🔒</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+        </tr>
+        <tr>
+          <td><code>publish</code></td>
+          <td>Publish Artikel</td>
+          <td style="text-align:center"><span class="toggle-on">✓</span> <span class="lock">🔒</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+        </tr>
+        <tr>
+          <td><code>analytics</code></td>
+          <td>Analytics</td>
+          <td style="text-align:center"><span class="toggle-on">✓</span> <span class="lock">🔒</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+        </tr>
+        <tr>
+          <td><code>manage_users</code></td>
+          <td>User Directory</td>
+          <td style="text-align:center"><span class="toggle-on">✓</span> <span class="lock">🔒</span></td>
+          <td style="text-align:center"><span class="toggle-on">✓</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+        </tr>
+        <tr>
+          <td><code>manage_roles</code></td>
+          <td>Role Manager</td>
+          <td style="text-align:center"><span class="toggle-on">✓</span> <span class="lock">🔒</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+        </tr>
+        <tr>
+          <td><code>settings</code></td>
+          <td>System Settings</td>
+          <td style="text-align:center"><span class="toggle-on">✓</span> <span class="lock">🔒</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+          <td style="text-align:center"><span class="toggle-off">✗</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box note">
+      <strong>ℹ️ Keterangan</strong>
+      🔒 = Dikunci permanen (Superuser selalu punya semua akses, tidak bisa diubah oleh siapapun).<br>
+      <span class="toggle-on">✓</span> = Toggle ON (aktif). &nbsp;
+      <span class="toggle-off">✗</span> = Toggle OFF (nonaktif). &nbsp;
+      Semua toggle selain kolom Superuser bisa diubah via halaman Role Manager.
+    </div>
+
+    <!-- ============ 4. FIELD DATA ============ -->
+    <h2>4. Field Data User</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:5%">No</th>
+          <th style="width:15%">Field</th>
+          <th style="width:15%">Tipe</th>
+          <th style="width:10%">Wajib</th>
+          <th>Keterangan / Contoh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><code>id</code></td><td>Auto-generate</td><td>—</td><td>UUID unik per user</td></tr>
+        <tr><td>2</td><td><code>name</code></td><td>Teks</td><td>✅</td><td>Nama lengkap. Contoh: <em>dr. Rifqi Rinaldi</em></td></tr>
+        <tr><td>3</td><td><code>email</code></td><td>Email</td><td>✅</td><td>Harus unik, digunakan untuk login</td></tr>
+        <tr><td>4</td><td><code>password</code></td><td>Hashed String</td><td>✅</td><td>Disimpan ter-<em>hash</em> (bukan <em>plain text</em>)</td></tr>
+        <tr><td>5</td><td><code>role</code></td><td>Enum</td><td>✅</td><td>superuser / admin / editor / writer</td></tr>
+        <tr><td>6</td><td><code>status</code></td><td>Boolean</td><td>✅</td><td>active / inactive (default: active)</td></tr>
+        <tr><td>7</td><td><code>title</code></td><td>Teks</td><td>—</td><td>Jabatan opsional. Contoh: <em>Kepala Redaksi</em></td></tr>
+        <tr><td>8</td><td><code>phone</code></td><td>Teks</td><td>—</td><td>No. Telepon opsional</td></tr>
+        <tr><td>9</td><td><code>createdAt</code></td><td>Timestamp</td><td>Auto</td><td>Tanggal user dibuat oleh sistem</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box warning">
+      <strong>⚠️ Akun Default Superuser</strong>
+      Nama: dr. Rifqi Rinaldi &nbsp;|&nbsp; Email: rifqi@bangkesehatan.com &nbsp;|&nbsp; Password: superadmin123 &nbsp;|&nbsp; Role: superuser<br>
+      Akun ini dibuat otomatis saat sistem pertama kali dijalankan dan <strong>tidak bisa dihapus</strong>.
+    </div>
+
+    <!-- ============ 5. USER FLOW ============ -->
+    <div class="page-break"></div>
+    <h2>5. User Flow Lengkap</h2>
+
+    <h3>Flow 1: Superuser Login & Melihat Semua Menu</h3>
+    <div class="mermaid">
+    sequenceDiagram
+      actor SU as Superuser
+      participant LP as Login Page
+      participant AUTH as AuthContext
+      participant SB as Sidebar
+      participant DB as Dashboard
+
+      SU->>LP: Masukkan Email dan Password
+      LP->>AUTH: login(email, password)
+      AUTH->>AUTH: Cocokkan dengan userStore
+      AUTH->>AUTH: Ambil role = superuser
+      AUTH->>AUTH: Ambil permission matrix
+      AUTH-->>LP: Login Berhasil
+      LP->>DB: Redirect ke Dashboard
+      DB->>SB: Render Sidebar
+      SB->>AUTH: Cek permissions user
+      AUTH-->>SB: Semua permission = ON
+      SB->>SB: Tampilkan SEMUA menu
+    </div>
+
+    <h3>Flow 2: Superuser Menambah User Baru</h3>
+    <div class="mermaid">
+    sequenceDiagram
+      actor SU as Superuser
+      participant UD as User Directory
+      participant MO as Modal Form
+      participant US as userStore
+
+      SU->>UD: Klik Tambah User Baru
+      UD->>MO: Buka Modal Form
+      Note over MO: Field: Nama, Email,<br/>Password, Role, Jabatan
+      SU->>MO: Isi data + Pilih Role Editor
+      SU->>MO: Klik Simpan
+      MO->>US: addUser(userData)
+      US->>US: Cek duplikat email
+      US->>US: Simpan ke localStorage
+      US-->>UD: User berhasil ditambahkan
+      UD->>UD: Refresh tabel user
+    </div>
+
+    <h3>Flow 3: Superuser Mengubah Permission Role</h3>
+    <div class="mermaid">
+    sequenceDiagram
+      actor SU as Superuser
+      participant RM as Role Manager
+      participant PM as permissionStore
+      participant ALL as Semua User Role Terkait
+
+      SU->>RM: Buka halaman Role Manager
+      RM->>PM: Ambil permission matrix
+      PM-->>RM: Tampilkan tabel toggle per role
+      Note over RM: Editor saat ini:<br/>Dashboard ON, Editor ON,<br/>AI ON, Analytics OFF
+      SU->>RM: Toggle Analytics untuk Editor ke ON
+      SU->>RM: Klik Simpan Perubahan
+      RM->>PM: updateRolePermissions(editor, [...])
+      PM-->>RM: Tersimpan!
+      Note over ALL: Semua user ber-role Editor<br/>otomatis bisa lihat Analytics
+    </div>
+
+    <h3>Flow 4: Writer Login (Akses Terbatas)</h3>
+    <div class="mermaid">
+    sequenceDiagram
+      actor WR as Writer
+      participant LP as Login Page
+      participant AUTH as AuthContext
+      participant SB as Sidebar
+
+      WR->>LP: Login dengan akun Writer
+      LP->>AUTH: login(email, password)
+      AUTH->>AUTH: Deteksi role = writer
+      AUTH-->>LP: Login Berhasil
+      LP->>SB: Render Sidebar
+      SB->>AUTH: Cek permissions
+      AUTH-->>SB: dashboard, editor, ai_generator
+      Note over SB: Hanya tampilkan:<br/>Dashboard, Content Manager,<br/>AI Generator
+      Note over SB: Sembunyikan:<br/>Analytics, User Directory,<br/>Settings
+    </div>
+
+    <h3>Flow 5: Writer Mencoba Akses Halaman Terlarang</h3>
+    <div class="mermaid">
+    sequenceDiagram
+      actor WR as Writer
+      participant BR as Browser URL
+      participant PR as ProtectedRoute
+      participant FO as Halaman 403
+
+      WR->>BR: Ketik manual /cms/users
+      BR->>PR: Request akses /cms/users
+      PR->>PR: Cek permission manage_users
+      PR->>PR: Writer TIDAK punya permission ini
+      PR->>FO: Redirect ke halaman 403
+      Note over FO: Akses Ditolak!<br/>Anda tidak memiliki izin<br/>untuk halaman ini
+    </div>
+
+    <!-- ============ 6. RINCIAN FILE ============ -->
+    <div class="page-break"></div>
+    <h2>6. Rincian Perubahan File</h2>
+
+    <h3>📁 File Baru (4 File)</h3>
+
+    <div class="file-item">
+      <span class="file-badge-new">NEW</span>
+      <span class="file-name">src/data/userStore.js</span>
+      <span class="file-desc">CRUD user + autentikasi + inisialisasi Superuser default</span>
+    </div>
+    <div class="file-item">
+      <span class="file-badge-new">NEW</span>
+      <span class="file-name">src/data/permissionStore.js</span>
+      <span class="file-desc">Permission matrix per role + CRUD konfigurasi</span>
+    </div>
+    <div class="file-item">
+      <span class="file-badge-new">NEW</span>
+      <span class="file-name">src/pages/cms/UserDirectoryPage.jsx</span>
+      <span class="file-desc">Halaman tabel user + modal tambah/edit + hapus</span>
+    </div>
+    <div class="file-item">
+      <span class="file-badge-new">NEW</span>
+      <span class="file-name">src/pages/cms/RoleManagerPage.jsx</span>
+      <span class="file-desc">Halaman toggle permission per role (khusus Superuser)</span>
+    </div>
+
+    <h3>📝 File Dimodifikasi (4 File)</h3>
+
+    <div class="file-item">
+      <span class="file-badge-mod">MOD</span>
+      <span class="file-name">src/context/AuthContext.jsx</span>
+      <span class="file-desc">Login dinamis + hasPermission() helper</span>
+    </div>
+    <div class="file-item">
+      <span class="file-badge-mod">MOD</span>
+      <span class="file-name">src/components/auth/ProtectedRoute.jsx</span>
+      <span class="file-desc">Route guard + redirect 403</span>
+    </div>
+    <div class="file-item">
+      <span class="file-badge-mod">MOD</span>
+      <span class="file-name">src/components/cms/CMSSidebar.jsx</span>
+      <span class="file-desc">Dynamic menu filtering berdasarkan permission</span>
+    </div>
+    <div class="file-item">
+      <span class="file-badge-mod">MOD</span>
+      <span class="file-name">src/main.jsx</span>
+      <span class="file-desc">Tambah route /cms/users dan /cms/roles</span>
+    </div>
+
+    <!-- ============ 7. VERIFIKASI ============ -->
+    <h2>7. Rencana Verifikasi</h2>
+
+    <h3>Build Test</h3>
+    <div class="code-block">
+      <span class="comment"># Memastikan tidak ada error kompilasi</span><br>
+      <span class="keyword">npm</span> run build
+    </div>
+
+    <h3>Manual Verification Checklist</h3>
+    <ul class="checklist">
+      <li><span class="check-box"></span> Login sebagai <strong>Superuser</strong> → Semua menu muncul, bisa akses User Directory & Role Manager</li>
+      <li><span class="check-box"></span> Tambah user baru dengan role <strong>Writer</strong> → User muncul di tabel</li>
+      <li><span class="check-box"></span> Login sebagai <strong>Writer</strong> baru → Hanya 3 menu muncul (Dashboard, Editor, AI)</li>
+      <li><span class="check-box"></span> Writer ketik manual <code>/cms/users</code> di URL → Muncul halaman 403</li>
+      <li><span class="check-box"></span> Superuser buka <strong>Role Manager</strong> → Toggle "Analytics" untuk Writer → ON</li>
+      <li><span class="check-box"></span> Login ulang sebagai Writer → Menu Analytics sekarang muncul</li>
+      <li><span class="check-box"></span> Coba hapus akun <strong>Superuser</strong> → Sistem menolak</li>
+      <li><span class="check-box"></span> Nonaktifkan user → User tersebut tidak bisa login</li>
+    </ul>
+
+    <!-- ============ FOOTER ============ -->
+    <div class="doc-footer">
+      <p><strong>Bang Kesehatan</strong> — Implementation Plan v0.1 | Dokumen ini bersifat rahasia dan hanya untuk penggunaan internal.</p>
+      <p>© 2026 Bang Kesehatan. All rights reserved.</p>
+    </div>
+
+  </div>
+</body>
+</html>
