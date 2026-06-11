@@ -1,10 +1,18 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
 
 export default function CMSSidebar({ collapsed, setCollapsed }) {
   const { user, logout, hasPermission } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Navigate ke login dulu TANPA state from, supaya tidak otomatis diredirect 
+    // ke halaman terakhir (yg mungkin restricted untuk role user yg baru login)
+    navigate('/cms/login', { replace: true });
+    logout();
+  };
 
   // Menu items dengan permission key
   const allNavItems = [
@@ -115,7 +123,7 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
         })}
 
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className={`flex items-center gap-3 px-3 py-2.5 text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-all duration-200 rounded-lg group ${collapsed ? 'justify-center' : ''}`}
           title={collapsed ? 'Sign Out' : undefined}
         >
@@ -124,17 +132,25 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
         </button>
         
         {/* User Profile */}
-        <div className={`mt-2 flex items-center gap-3 px-2 py-3 rounded-xl border border-transparent ${collapsed ? 'justify-center' : 'hover:border-border-muted hover:bg-surface-container-lowest transition-colors cursor-pointer'}`}>
-          <div className="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold flex-shrink-0">
-            {user?.name ? user.name.charAt(0) : 'A'}
-          </div>
+        <Link 
+          to="/cms/profile"
+          title={collapsed ? 'My Profile' : undefined}
+          className={`mt-2 flex items-center gap-3 px-2 py-3 rounded-xl border border-transparent ${collapsed ? 'justify-center' : 'hover:border-border-muted hover:bg-surface-container-lowest transition-colors cursor-pointer'}`}
+        >
+          {user?.avatar ? (
+            <img src={user.avatar} alt={user?.name} className="w-8 h-8 rounded-full object-cover border border-border-muted flex-shrink-0" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold flex-shrink-0">
+              {user?.name ? user.name.charAt(0) : 'A'}
+            </div>
+          )}
           {!collapsed && (
             <div className="flex flex-col truncate">
               <span className="font-label-sm text-sm text-on-surface truncate">{user?.name || 'Admin Sistem'}</span>
               <span className="text-[10px] text-outline uppercase font-semibold">{user?.role || 'ADMIN'}</span>
             </div>
           )}
-        </div>
+        </Link>
       </div>
     </nav>
   );

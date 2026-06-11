@@ -23,5 +23,15 @@ export default function ProtectedRoute({ requiredPermission }) {
     return <Navigate to="/cms/access-denied" replace />;
   }
 
+  // Jika user wajib ganti password, cegat semua akses KECUALI ke halaman force-reset
+  if (user.requirePasswordReset && location.pathname !== '/cms/force-reset') {
+    return <Navigate to="/cms/force-reset" replace />;
+  }
+
+  // Sebaliknya, jika sudah tidak perlu ganti password tapi mencoba masuk ke force-reset
+  if (!user.requirePasswordReset && location.pathname === '/cms/force-reset') {
+    return <Navigate to="/cms" replace />;
+  }
+
   return <Outlet />;
 }

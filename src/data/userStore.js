@@ -28,6 +28,13 @@ const DEFAULT_SUPERUSER = {
   status: 'active',
   title: 'Founder & Superuser',
   phone: '',
+  avatar: '',
+  bio: '',
+  strNumber: '',
+  linkedin: '',
+  instagram: '',
+  lastLogin: null,
+  requirePasswordReset: false,
   createdAt: new Date('2026-06-11').toISOString(),
 };
 
@@ -59,7 +66,7 @@ export function getUserById(id) {
   return users.find(u => u.id === id) || null;
 }
 
-export function addUser({ name, email, password, role, title = '', phone = '' }) {
+export function addUser({ name, email, password, role, title = '', phone = '', requirePasswordReset = true }) {
   const users = getUsers();
 
   // Cek duplikat email
@@ -82,6 +89,13 @@ export function addUser({ name, email, password, role, title = '', phone = '' })
     status: 'active',
     title,
     phone,
+    avatar: '',
+    bio: '',
+    strNumber: '',
+    linkedin: '',
+    instagram: '',
+    lastLogin: null,
+    requirePasswordReset,
     createdAt: new Date().toISOString(),
   };
 
@@ -145,13 +159,36 @@ export function toggleUserStatus(id) {
 
 export function authenticateUser(email, password) {
   const users = getUsers();
-  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const userIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
 
-  if (!user) throw new Error('Email atau password salah.');
+  if (userIndex === -1) throw new Error('Email atau password salah.');
+  const user = users[userIndex];
+  
   if (!verifyPassword(password, user.password)) throw new Error('Email atau password salah.');
   if (user.status === 'inactive') throw new Error('Akun Anda telah dinonaktifkan. Hubungi administrator.');
 
+  // Update last login
+  const updatedUser = { ...user, lastLogin: new Date().toISOString() };
+  users[userIndex] = updatedUser;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+
   // Return user data tanpa password
-  const { password: _, ...safeUser } = user;
+  const { password: _, ...safeUser } = updatedUser;
   return safeUser;
+}
+
+// ============ Password Change ============
+export function changePassword(id, oldPassword, newPassword) {
+  const users = getUsers();
+  const index = users.findIndex(u => u.id === id);
+  if (index === -1) throw new Error('User tidak ditemukan.');
+
+  if (!verifyPassword(oldPassword, users[index].password)) {
+    throw new Error('Password lama salah.');
+  }
+
+  users[index].password = hashPassword(newPassword);
+  users[index].requirePasswordReset = false; // Hapus flag force reset
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+  return true;
 }

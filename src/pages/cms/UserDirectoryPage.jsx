@@ -9,7 +9,7 @@ const ROLE_BADGES = {
   writer:    { bg: '#EDE9FE', color: '#5B21B6', label: 'Writer' },
 };
 
-const INITIAL_FORM = { name: '', email: '', password: '', role: 'writer', title: '', phone: '' };
+const INITIAL_FORM = { name: '', email: '', password: '', role: 'writer', title: '', phone: '', requirePasswordReset: true };
 
 export default function UserDirectoryPage() {
   const { user: currentUser } = useAuth();
@@ -51,7 +51,15 @@ export default function UserDirectoryPage() {
   // Open modal for editing existing user
   const handleEdit = (user) => {
     setEditingUser(user);
-    setForm({ name: user.name, email: user.email, password: '', role: user.role, title: user.title || '', phone: user.phone || '' });
+    setForm({ 
+      name: user.name, 
+      email: user.email, 
+      password: '', 
+      role: user.role, 
+      title: user.title || '', 
+      phone: user.phone || '',
+      requirePasswordReset: user.requirePasswordReset || false
+    });
     setFormError('');
     setShowModal(true);
   };
@@ -72,7 +80,14 @@ export default function UserDirectoryPage() {
 
     try {
       if (editingUser) {
-        const updates = { name: form.name, email: form.email, role: form.role, title: form.title, phone: form.phone };
+        const updates = { 
+          name: form.name, 
+          email: form.email, 
+          role: form.role, 
+          title: form.title, 
+          phone: form.phone,
+          requirePasswordReset: form.requirePasswordReset
+        };
         if (form.password.trim()) updates.password = form.password;
         updateUser(editingUser.id, updates);
         showSuccess(`User "${form.name}" berhasil diperbarui.`);
@@ -192,7 +207,7 @@ export default function UserDirectoryPage() {
                 <th className="text-left px-5 py-3.5 font-label-md text-label-md font-semibold text-on-surface-variant">Role</th>
                 <th className="text-left px-5 py-3.5 font-label-md text-label-md font-semibold text-on-surface-variant hidden md:table-cell">Jabatan</th>
                 <th className="text-center px-5 py-3.5 font-label-md text-label-md font-semibold text-on-surface-variant">Status</th>
-                <th className="text-left px-5 py-3.5 font-label-md text-label-md font-semibold text-on-surface-variant hidden lg:table-cell">Bergabung</th>
+                <th className="text-left px-5 py-3.5 font-label-md text-label-md font-semibold text-on-surface-variant hidden lg:table-cell">Login Terakhir</th>
                 <th className="text-right px-5 py-3.5 font-label-md text-label-md font-semibold text-on-surface-variant">Aksi</th>
               </tr>
             </thead>
@@ -202,10 +217,14 @@ export default function UserDirectoryPage() {
                   {/* User Info */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
-                        style={{ background: ROLE_BADGES[u.role]?.bg, color: ROLE_BADGES[u.role]?.color }}>
-                        {u.name.charAt(0).toUpperCase()}
-                      </div>
+                      {u.avatar ? (
+                        <img src={u.avatar} alt={u.name} className="w-10 h-10 rounded-full object-cover border border-border-muted flex-shrink-0" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+                          style={{ background: ROLE_BADGES[u.role]?.bg, color: ROLE_BADGES[u.role]?.color }}>
+                          {u.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div className="min-w-0">
                         <div className="font-label-md text-label-md font-semibold text-on-surface truncate">{u.name}</div>
                         <div className="font-body-sm text-body-sm text-on-surface-variant truncate">{u.email}</div>
@@ -241,7 +260,9 @@ export default function UserDirectoryPage() {
                   </td>
                   {/* Date */}
                   <td className="px-5 py-4 hidden lg:table-cell">
-                    <span className="font-body-sm text-body-sm text-on-surface-variant">{formatDate(u.createdAt)}</span>
+                    <div className="font-body-sm text-body-sm text-on-surface-variant">
+                      {u.lastLogin ? formatDate(u.lastLogin) : 'Belum pernah'}
+                    </div>
                   </td>
                   {/* Actions */}
                   <td className="px-5 py-4 text-right">
@@ -343,6 +364,20 @@ export default function UserDirectoryPage() {
                     placeholder="Opsional"
                     className="w-full px-4 py-2.5 bg-surface border border-border-muted rounded-xl font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
                 </div>
+              </div>
+
+              <div className="pt-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={form.requirePasswordReset}
+                    onChange={(e) => setForm({...form, requirePasswordReset: e.target.checked})}
+                    className="w-5 h-5 text-primary bg-surface border-border-muted rounded focus:ring-primary focus:ring-2"
+                  />
+                  <span className="font-body-md text-body-md text-on-surface">
+                    Wajibkan user mengganti password saat login pertama
+                  </span>
+                </label>
               </div>
 
               {/* Submit */}

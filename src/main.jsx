@@ -14,6 +14,8 @@ import ArticleEditorPage from './pages/cms/ArticleEditorPage.jsx';
 import UserDirectoryPage from './pages/cms/UserDirectoryPage.jsx';
 import RoleManagerPage from './pages/cms/RoleManagerPage.jsx';
 import AccessDeniedPage from './pages/cms/AccessDeniedPage.jsx';
+import MyProfilePage from './pages/cms/MyProfilePage.jsx';
+import ForceResetPasswordPage from './pages/cms/ForceResetPasswordPage.jsx';
 import './index.css';
 
 createRoot(document.getElementById('root')).render(
@@ -43,7 +45,9 @@ createRoot(document.getElementById('root')).render(
               <Route path="/cms" element={<CMSLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="editor" element={<ArticleEditorPage />} />
+                <Route path="profile" element={<MyProfilePage />} />
               </Route>
+              <Route path="/cms/force-reset" element={<ForceResetPasswordPage />} />
             </Route>
 
             {/* CMS Protected Routes — User Directory (butuh manage_users) */}
