@@ -1,9 +1,9 @@
 {
-  "name": "bang-kesehatan",
+  "name": "senadee",
   "private": true,
   "version": "0.2.0",
   "type": "module",
-  "description": "Bang Kesehatan - Portal Media Kesehatan Tepercaya",
+  "description": "Senadee - Portal Media Kesehatan Terdepan",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

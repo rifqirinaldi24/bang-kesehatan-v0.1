@@ -28,8 +28,8 @@ export default function Navbar() {
               </svg>
             </div>
             <div>
-              <span className="font-heading font-bold text-lg text-on-surface tracking-tight">
-                Bang<span className="text-gradient">Kesehatan</span>
+              <span className="font-brand font-bold text-lg text-on-surface tracking-tight">
+                Senadee
               </span>
             </div>
           </Link>

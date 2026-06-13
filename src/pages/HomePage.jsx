@@ -22,7 +22,7 @@ export default function HomePage() {
     <>
       <SEOHead
         title="Beranda"
-        description="Bang Kesehatan - Portal media kesehatan tepercaya untuk keluarga muda Indonesia. Temukan artikel kesehatan yang diverifikasi oleh tim medis."
+        description="Senadee - Portal media kesehatan tepercaya untuk keluarga muda Indonesia. Temukan artikel kesehatan yang diverifikasi oleh tim medis."
         path="/"
       />
 

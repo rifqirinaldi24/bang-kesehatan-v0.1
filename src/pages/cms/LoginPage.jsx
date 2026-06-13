@@ -51,7 +51,7 @@ export default function LoginPage() {
                 admin_panel_settings
               </span>
             </div>
-            <h1 className="font-headline-md text-headline-md text-primary">Bang Kesehatan</h1>
+            <h1 className="font-brand text-headline-md text-primary font-bold">Senadee</h1>
             <p className="font-body-md text-body-md text-on-surface-variant mt-2">Admin Console</p>
           </div>
 
@@ -112,7 +112,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-label-md text-label-md text-on-primary bg-primary hover:bg-on-primary-fixed-variant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 disabled:opacity-50 cursor-pointer"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-brand font-bold text-label-md text-on-primary bg-primary hover:bg-on-primary-fixed-variant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? 'Signing In...' : 'Sign In'}
               </button>

@@ -43,15 +43,15 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
       <div className={`h-[72px] flex items-center border-b border-border-muted ${collapsed ? 'justify-center' : 'px-6 justify-between'}`}>
         {!collapsed && (
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold font-heading">
-              B
+            <div className="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold font-brand">
+              S
             </div>
-            <span className="font-headline-md text-headline-md text-primary font-bold tracking-tight">Bang</span>
+            <span className="font-brand text-headline-md text-primary font-bold tracking-tight">Senadee</span>
           </div>
         )}
         {collapsed && (
-          <div className="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold font-heading">
-            B
+          <div className="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold font-brand">
+            S
           </div>
         )}
         <button 
