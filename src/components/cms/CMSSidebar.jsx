@@ -43,13 +43,13 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
       <div className={`h-[72px] flex items-center border-b border-border-muted ${collapsed ? 'justify-center' : 'px-6 justify-between'}`}>
         {!collapsed && (
           <Link to="/cms" className="flex items-center gap-2 overflow-hidden outline-none">
-            <img src="/logo.png" alt="Senadee Logo" className="w-8 h-8 object-contain flex-shrink-0" />
+            <img src="/logo.png" alt="Senadee Logo" className="w-8 h-8 rounded-lg object-contain flex-shrink-0" />
             <span className="font-brand text-headline-md text-primary font-bold tracking-tight">Senadee</span>
           </Link>
         )}
         {collapsed && (
           <Link to="/cms" className="outline-none flex-shrink-0">
-            <img src="/logo.png" alt="Senadee Logo" className="w-8 h-8 object-contain" />
+            <img src="/logo.png" alt="Senadee Logo" className="w-8 h-8 rounded-lg object-contain" />
           </Link>
         )}
         <button 

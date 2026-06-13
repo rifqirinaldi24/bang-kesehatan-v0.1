@@ -23,7 +23,7 @@ export default function Navbar() {
             onClick={() => setIsMenuOpen(false)}
             aria-label="Senadee Home"
           >
-            <img src="/logo.png" alt="Senadee Logo" className="w-8 h-8 object-contain" />
+            <img src="/logo.png" alt="Senadee Logo" className="w-8 h-8 rounded-xl object-contain shadow-sm" />
             <span className="font-brand text-xl sm:text-2xl font-bold tracking-tight text-senadee-dark group-hover:text-senadee-primary transition-colors">
               Senadee
             </span>

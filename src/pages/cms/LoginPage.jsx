@@ -47,7 +47,7 @@ export default function LoginPage() {
           {/* Header */}
           <div className="mb-8 text-center flex flex-col items-center">
             <div className="mb-4">
-              <img src="/logo.png" alt="Senadee Logo" className="w-16 h-16 object-contain drop-shadow-md" />
+              <img src="/logo.png" alt="Senadee Logo" className="w-16 h-16 rounded-2xl object-contain drop-shadow-md" />
             </div>
             <h1 className="font-brand text-headline-md text-primary font-bold">Senadee</h1>
             <p className="font-body-md text-body-md text-on-surface-variant mt-2">Admin Console</p>
