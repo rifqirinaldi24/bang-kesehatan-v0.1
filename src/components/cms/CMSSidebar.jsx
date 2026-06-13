@@ -79,15 +79,15 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
             <Link
               key={item.name}
               to={item.path}
-              className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-200 rounded-lg group relative ${
+              className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-200 rounded-lg font-body group relative ${
                 isActive
-                  ? 'text-primary bg-primary-fixed/30 font-medium'
-                  : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                  ? 'text-senadee-primary bg-senadee-light/50 font-bold'
+                  : 'text-on-surface-variant hover:bg-senadee-canvas hover:text-senadee-primary'
               }`}
               title={collapsed ? item.name : undefined}
             >
               {isActive && (
-                <div className="absolute left-0 top-2 bottom-2 w-1 bg-primary rounded-r-full"></div>
+                <div className="absolute left-0 top-2 bottom-2 w-1 bg-senadee-primary rounded-r-full"></div>
               )}
               <span
                 className={`material-symbols-outlined transition-transform ${collapsed ? 'mx-auto' : ''} ${isActive ? 'text-primary' : 'group-hover:scale-110'}`}
@@ -109,10 +109,10 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
             <Link
               key={item.name}
               to={item.path}
-              className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-200 rounded-lg group ${collapsed ? 'justify-center' : ''} ${
+              className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-200 rounded-lg font-body group ${collapsed ? 'justify-center' : ''} ${
                 isActive
-                  ? 'text-primary bg-primary-fixed/30 font-medium'
-                  : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                  ? 'text-senadee-primary bg-senadee-light/50 font-bold'
+                  : 'text-on-surface-variant hover:bg-senadee-canvas hover:text-senadee-primary'
               }`}
               title={collapsed ? item.name : undefined}
             >

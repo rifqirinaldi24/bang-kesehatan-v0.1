@@ -213,7 +213,7 @@ export default function UserDirectoryPage() {
             </thead>
             <tbody>
               {filteredUsers.map((u) => (
-                <tr key={u.id} className="border-b border-border-muted last:border-b-0 hover:bg-surface-container-low/30 transition-colors">
+                <tr key={u.id} className="border-b border-border-muted last:border-b-0 hover:bg-senadee-canvas transition-colors">
                   {/* User Info */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
@@ -268,7 +268,7 @@ export default function UserDirectoryPage() {
                   <td className="px-5 py-4 text-right">
                     {canManageUser(u) && u.role !== 'superuser' ? (
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handleEdit(u)} className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors cursor-pointer" title="Edit">
+                        <button onClick={() => handleEdit(u)} className="p-2 rounded-lg text-on-surface-variant hover:bg-senadee-light/30 hover:text-senadee-primary transition-colors cursor-pointer" title="Edit">
                           <span className="material-symbols-outlined text-[20px]">edit</span>
                         </button>
                         <button onClick={() => setDeleteConfirm(u)} className="p-2 rounded-lg text-on-surface-variant hover:bg-error-container hover:text-on-error-container transition-colors cursor-pointer" title="Hapus">

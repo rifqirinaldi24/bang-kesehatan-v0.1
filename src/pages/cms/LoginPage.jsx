@@ -33,8 +33,8 @@ export default function LoginPage() {
     <div className="bg-surface-dim min-h-screen flex flex-col justify-between items-center text-on-surface antialiased relative">
       {/* Decorative background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-[-10%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-surface-variant blur-3xl opacity-60"></div>
-        <div className="absolute bottom-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-surface-container-high blur-3xl opacity-50"></div>
+        <div className="absolute top-[-10%] right-[-5%] w-[50vw] h-[50vw] rounded-full bg-senadee-primary/20 blur-3xl opacity-60"></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-senadee-light/40 blur-3xl opacity-50"></div>
       </div>
 
       {/* Main Content Area */}
@@ -112,7 +112,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-brand font-bold text-label-md text-on-primary bg-primary hover:bg-on-primary-fixed-variant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 disabled:opacity-50 cursor-pointer"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-brand font-bold text-label-md text-on-primary bg-senadee-primary hover:bg-senadee-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-senadee-primary transition-colors duration-200 disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? 'Signing In...' : 'Sign In'}
               </button>
