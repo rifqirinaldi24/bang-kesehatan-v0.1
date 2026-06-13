@@ -27,68 +27,19 @@ export default function HomePage() {
       />
 
       {/* Hero Section */}
-      <section id="hero-section" className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-on-tertiary-fixed-variant">
-        {/* Background decoration */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary-container/20 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-tertiary-container/20 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3" />
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-white/5 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2" />
-        </div>
-
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-          <div className="text-center max-w-3xl mx-auto">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm mb-6 animate-fade-in">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-primary-fixed-dim">
-                <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 0 0-1.032 0 11.209 11.209 0 0 1-7.877 3.08.75.75 0 0 0-.722.515A12.74 12.74 0 0 0 2.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 0 0 .374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 0 0-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25z" clipRule="evenodd" />
-              </svg>
-              100% Diverifikasi Tim Medis
-            </div>
-
+      <section id="hero-section" className="relative bg-senadee-canvas">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-32">
+          <div className="text-center max-w-4xl mx-auto">
             {/* Heading */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-extrabold text-white leading-tight mb-6 animate-slide-up">
-              Informasi Kesehatan{' '}
-              <span className="relative">
-                <span className="relative z-10 text-primary-fixed-dim">Tepercaya</span>
-                <span className="absolute bottom-1 left-0 right-0 h-3 bg-white/10 rounded-full -z-0" />
-              </span>{' '}
-              untuk Keluarga Anda
+            <h1 className="font-tagline font-heading text-senadee-dark text-4xl md:text-6xl tracking-tight mb-8 animate-slide-up">
+              Pikiran Tenang, Langkah Sehat.
             </h1>
 
-            <p className="text-lg sm:text-xl text-primary-fixed/80 leading-relaxed mb-10 max-w-2xl mx-auto animate-slide-up">
-              Portal media kesehatan berbasis AI dengan konten yang telah divalidasi oleh tenaga medis profesional. Mudah dipahami, bisa langsung diterapkan.
-            </p>
-
             {/* Search Bar */}
-            <div className="flex justify-center animate-scale-in">
+            <div className="flex justify-center mt-6 animate-scale-in">
               <SearchBar />
             </div>
-
-            {/* Stats */}
-            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-10 text-primary-fixed/70 animate-fade-in">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-white">{articles.length}+</span>
-                <span className="text-sm">Artikel</span>
-              </div>
-              <div className="w-px h-6 bg-white/20" />
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-white">4</span>
-                <span className="text-sm">Pilar Kesehatan</span>
-              </div>
-              <div className="w-px h-6 bg-white/20" />
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-white">100%</span>
-                <span className="text-sm">Terverifikasi</span>
-              </div>
-            </div>
           </div>
-        </div>
-
-        {/* Bottom wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-            <path d="M0 60V30C240 0 480 0 720 30C960 60 1200 60 1440 30V60H0Z" fill="var(--color-surface)" />
-          </svg>
         </div>
       </section>
 
@@ -144,7 +95,7 @@ export default function HomePage() {
           <h2 className="text-2xl sm:text-3xl font-heading font-bold text-on-surface mb-6">
             ✨ Artikel Pilihan
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {featuredArticles.map((article) => (
               <ArticleCard key={article.id} article={article} featured />
             ))}
@@ -159,7 +110,7 @@ export default function HomePage() {
         </h2>
 
         {nonFeaturedArticles.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {nonFeaturedArticles.map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}

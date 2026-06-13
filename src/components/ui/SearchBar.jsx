@@ -24,10 +24,10 @@ export default function SearchBar() {
   return (
     <div id="search-bar" className="relative w-full max-w-xl">
       <div
-        className={`relative flex items-center rounded-2xl border-2 transition-all duration-300 ${
+        className={`relative flex items-center rounded-full transition-all duration-300 ${
           isFocused
-            ? 'border-primary-container shadow-lg shadow-primary-container/10 bg-background'
-            : 'border-surface-container bg-surface hover:border-outline-variant'
+            ? 'shadow-md border border-senadee-light bg-white'
+            : 'shadow-sm border border-transparent bg-white hover:border-senadee-light'
         }`}
       >
         <svg
@@ -46,7 +46,7 @@ export default function SearchBar() {
         </svg>
         <input
           type="text"
-          placeholder="Cari artikel kesehatan..."
+          placeholder="Cari gejala atau topik kesehatan preventif di sini..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}

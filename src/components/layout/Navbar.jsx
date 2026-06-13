@@ -35,23 +35,25 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-6">
             <Link
               to="/"
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                isHome
-                  ? 'text-primary bg-primary-fixed'
-                  : 'text-on-surface-variant hover:text-primary hover:bg-primary-fixed'
-              }`}
+              className="font-brand text-senadee-dark hover:text-senadee-primary font-bold transition-colors"
             >
-              Beranda
+              Artikel
             </Link>
-            <span className="px-4 py-2 rounded-xl text-sm font-medium text-outline cursor-default">
-              Kategori
-            </span>
-            <span className="px-4 py-2 rounded-xl text-sm font-medium text-outline cursor-default">
-              Tentang
-            </span>
+            <Link
+              to="/"
+              className="font-brand text-senadee-dark hover:text-senadee-primary font-bold transition-colors"
+            >
+              Komunitas
+            </Link>
+            <Link
+              to="/"
+              className="font-brand text-senadee-dark hover:text-senadee-primary font-bold transition-colors"
+            >
+              Tentang Kita
+            </Link>
           </nav>
 
           {/* Mobile Menu Toggle */}
@@ -80,18 +82,24 @@ export default function Navbar() {
               <Link
                 to="/"
                 onClick={() => setIsMenuOpen(false)}
-                className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                  isHome ? 'text-primary bg-primary-fixed' : 'text-on-surface-variant hover:bg-surface'
-                }`}
+                className="px-4 py-3 rounded-xl text-sm font-brand font-bold text-senadee-dark hover:text-senadee-primary transition-colors"
               >
-                🏠 Beranda
+                Artikel
               </Link>
-              <span className="px-4 py-3 rounded-xl text-sm font-medium text-outline">
-                📂 Kategori (segera hadir)
-              </span>
-              <span className="px-4 py-3 rounded-xl text-sm font-medium text-outline">
-                ℹ️ Tentang (segera hadir)
-              </span>
+              <Link
+                to="/"
+                onClick={() => setIsMenuOpen(false)}
+                className="px-4 py-3 rounded-xl text-sm font-brand font-bold text-senadee-dark hover:text-senadee-primary transition-colors"
+              >
+                Komunitas
+              </Link>
+              <Link
+                to="/"
+                onClick={() => setIsMenuOpen(false)}
+                className="px-4 py-3 rounded-xl text-sm font-brand font-bold text-senadee-dark hover:text-senadee-primary transition-colors"
+              >
+                Tentang Kita
+              </Link>
             </nav>
           </div>
         )}
