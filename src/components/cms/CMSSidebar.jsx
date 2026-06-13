@@ -42,17 +42,15 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
       {/* Header */}
       <div className={`h-[72px] flex items-center border-b border-border-muted ${collapsed ? 'justify-center' : 'px-6 justify-between'}`}>
         {!collapsed && (
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold font-brand">
-              S
-            </div>
+          <Link to="/cms" className="flex items-center gap-2 overflow-hidden outline-none">
+            <img src="/logo.png" alt="Senadee Logo" className="w-8 h-8 object-contain flex-shrink-0" />
             <span className="font-brand text-headline-md text-primary font-bold tracking-tight">Senadee</span>
-          </div>
+          </Link>
         )}
         {collapsed && (
-          <div className="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold font-brand">
-            S
-          </div>
+          <Link to="/cms" className="outline-none flex-shrink-0">
+            <img src="/logo.png" alt="Senadee Logo" className="w-8 h-8 object-contain" />
+          </Link>
         )}
         <button 
           onClick={() => setCollapsed(!collapsed)}
