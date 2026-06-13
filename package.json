@@ -1,7 +1,7 @@
 {
   "name": "senadee",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Senadee - Portal Media Kesehatan Terdepan",
   "scripts": {
