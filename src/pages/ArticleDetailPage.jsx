@@ -209,7 +209,7 @@ export default function ArticleDetailPage() {
                       </span>
                       {section.heading}
                     </h2>
-                    <div className="text-on-surface leading-relaxed whitespace-pre-line pl-11">
+                    <div className="text-on-surface font-body text-base sm:text-lg leading-relaxed whitespace-pre-line pl-11">
                       {section.text}
                     </div>
                   </section>

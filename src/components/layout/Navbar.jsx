@@ -40,6 +40,12 @@ export default function Navbar() {
               to="/"
               className="font-brand text-senadee-dark hover:text-senadee-primary font-bold transition-colors"
             >
+              Beranda
+            </Link>
+            <Link
+              to="/"
+              className="font-brand text-senadee-dark hover:text-senadee-primary font-bold transition-colors"
+            >
               Artikel
             </Link>
             <Link
@@ -79,6 +85,13 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="md:hidden pb-4 border-t border-surface-container-low pt-3 animate-slide-down">
             <nav className="flex flex-col gap-1">
+              <Link
+                to="/"
+                onClick={() => setIsMenuOpen(false)}
+                className="px-4 py-3 rounded-xl text-sm font-brand font-bold text-senadee-dark hover:text-senadee-primary transition-colors"
+              >
+                Beranda
+              </Link>
               <Link
                 to="/"
                 onClick={() => setIsMenuOpen(false)}
