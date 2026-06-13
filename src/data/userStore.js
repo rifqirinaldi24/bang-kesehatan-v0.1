@@ -2,7 +2,7 @@
 // userStore.js — Data layer untuk manajemen user (localStorage)
 // ============================================================
 
-const STORAGE_KEY = 'bk_users';
+const STORAGE_KEY = 'senadee_users_v2';
 
 // Simple hash function for passwords (base64 — adequate for localStorage MVP)
 function hashPassword(password) {
@@ -21,8 +21,8 @@ function generateId() {
 // Default Superuser — dibuat otomatis saat pertama kali
 const DEFAULT_SUPERUSER = {
   id: 'usr_superuser_001',
-  name: 'dr. Rifqi Rinaldi',
-  email: 'rifqi@bangkesehatan.com',
+  name: 'Superadmin Senadee',
+  email: 'super.senadee@senadee.id',
   password: hashPassword('superadmin123'),
   role: 'superuser',
   status: 'active',

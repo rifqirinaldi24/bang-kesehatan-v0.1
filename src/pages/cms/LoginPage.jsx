@@ -77,7 +77,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-border-muted rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent font-body-md text-body-md transition-all duration-200"
-                  placeholder="admin@bangkesehatan.com"
+                  placeholder="super.senadee@senadee.id"
                   required
                 />
               </div>
