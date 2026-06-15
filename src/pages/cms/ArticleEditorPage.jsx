@@ -5,6 +5,7 @@ import CMSHeader from '../../components/cms/CMSHeader';
 import LexicalEditor from '../../components/cms/LexicalEditor';
 import Toast from '../../components/ui/Toast';
 import { getAllArticles, saveArticle } from '../../data/articleStore';
+import { getActiveCategories } from '../../data/categoryStore';
 import { useAuth } from '../../context/AuthContext';
 
 export default function ArticleEditorPage({ isModal = false, editId: propEditId = null, onClose }) {
@@ -20,6 +21,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [isVerified, setIsVerified] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
   
   // AI State
   const [isGenerating, setIsGenerating] = useState(false);
@@ -41,6 +43,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
         setTitle(articleToEdit.title || '');
         setSlug(articleToEdit.slug || '');
         setTopic(articleToEdit.title || '');
+        setSelectedCategory(articleToEdit.category || '');
         setInitialContent(articleToEdit.content ? JSON.stringify(articleToEdit.content) : ''); // Just mock load
       }
     }
@@ -53,6 +56,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       slug,
       author: user?.name || 'Unknown Writer',
       status: 'draft',
+      category: selectedCategory || 'general',
       content: initialContent ? [{ heading: 'Draft Content', text: 'MOCKED CONTENT' }] : []
     };
     const saved = saveArticle(data);
@@ -71,7 +75,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       slug: slug || 'untitled-article',
       author: user?.name || 'Unknown Writer',
       status: 'published',
-      category: 'general',
+      category: selectedCategory || 'general',
       readingTime: 5,
       date: new Date().toISOString().split('T')[0],
       isVerified: true,
@@ -416,12 +420,16 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
             <h3 className="font-label-md text-label-md font-bold text-on-surface mb-4">Categorization</h3>
             <div className="flex flex-col gap-4">
               <div>
-                <label className="font-label-sm text-label-sm font-medium text-on-surface-variant block mb-1.5">Kategori</label>
-                <select className="w-full bg-surface border border-border-muted rounded-lg font-body-sm text-body-sm p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none cursor-pointer">
-                  <option>Endocrinology</option>
-                  <option>Cardiology</option>
-                  <option>Nutrition</option>
-                  <option>General Wellness</option>
+                <label className="font-label-sm text-label-sm font-medium text-on-surface-variant block mb-1.5">Kategori *</label>
+                <select 
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full bg-surface border border-border-muted rounded-lg font-body-sm text-body-sm p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none cursor-pointer"
+                >
+                  <option value="">-- Pilih Kategori --</option>
+                  {getActiveCategories().map(cat => (
+                    <option key={cat.id} value={cat.key}>{cat.icon} {cat.name}</option>
+                  ))}
                 </select>
               </div>
               

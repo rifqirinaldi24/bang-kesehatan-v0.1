@@ -27,7 +27,20 @@ function initialize() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_MENU_ORDER));
     return DEFAULT_MENU_ORDER.map(m => ({ ...m }));
   }
-  return JSON.parse(stored);
+  // Migration: merge any new default menus that don't exist in stored data
+  const parsed = JSON.parse(stored);
+  const storedIds = parsed.map(m => m.id);
+  let hasNew = false;
+  DEFAULT_MENU_ORDER.forEach(def => {
+    if (!storedIds.includes(def.id)) {
+      parsed.push({ ...def });
+      hasNew = true;
+    }
+  });
+  if (hasNew) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+  }
+  return parsed;
 }
 
 function save(menuOrder) {

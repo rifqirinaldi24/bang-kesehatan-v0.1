@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import CMSHeader from '../../components/cms/CMSHeader';
 import { getAllArticles, deleteArticle } from '../../data/articleStore';
 import { formatDate } from '../../data/articles';
-import ArticleEditorPage from './ArticleEditorPage';
 
 export default function ArticleListPage() {
   const [articles, setArticles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewingArticle, setViewingArticle] = useState(null);
-  const [editingId, setEditingId] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const refreshArticles = () => {
     const all = getAllArticles().filter(a => a.status === 'published');
@@ -19,15 +17,6 @@ export default function ArticleListPage() {
   useEffect(() => {
     refreshArticles();
   }, []);
-
-  const handleDelete = (id, e) => {
-    e?.stopPropagation();
-    if (window.confirm("Apakah Anda yakin ingin menghapus artikel ini?")) {
-      deleteArticle(id);
-      refreshArticles();
-      if (viewingArticle?.id === id) setViewingArticle(null);
-    }
-  };
 
   const handleRowClick = (article) => {
     setViewingArticle(article);
@@ -39,18 +28,32 @@ export default function ArticleListPage() {
     document.body.style.overflow = '';
   };
 
-  const handleOpenEditor = (id, e) => {
-    e?.stopPropagation();
-    setViewingArticle(null);
-    setEditingId(id);
-    document.body.style.overflow = 'hidden';
+  const handleRequestDelete = () => {
+    // From View Modal, user clicks Delete → show confirmation
+    setDeleteConfirm(viewingArticle);
   };
 
-  const handleCloseEditor = (needsRefresh) => {
-    setEditingId(null);
-    document.body.style.overflow = '';
-    if (needsRefresh) {
+  const handleConfirmDelete = () => {
+    if (deleteConfirm) {
+      deleteArticle(deleteConfirm.id);
       refreshArticles();
+      setDeleteConfirm(null);
+      setViewingArticle(null);
+      document.body.style.overflow = '';
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirm(null);
+  };
+
+  const handleDeleteFromTable = (id, e) => {
+    e.stopPropagation();
+    // Find article and show view modal first
+    const article = articles.find(a => a.id === id);
+    if (article) {
+      setViewingArticle(article);
+      document.body.style.overflow = 'hidden';
     }
   };
 
@@ -60,11 +63,9 @@ export default function ArticleListPage() {
     article.author.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const headerActions = null; // No Add button in History
-
   return (
     <>
-      <CMSHeader title="Semua Artikel" subtitle="Article History & Management" headerActions={headerActions} />
+      <CMSHeader title="Semua Artikel" subtitle="Article History (Read Only)" />
       
       <div className="p-margin-mobile md:p-gutter max-w-container-max mx-auto w-full">
         <div className="bg-surface-container-lowest rounded-xl border border-border-muted shadow-sm overflow-hidden">
@@ -113,14 +114,9 @@ export default function ArticleListPage() {
                       <td className="p-4">{article.author}</td>
                       <td className="p-4">{formatDate(article.date || article.updatedAt)}</td>
                       <td className="p-4 text-right whitespace-nowrap">
-                        <div className="flex justify-end gap-2">
-                          <button onClick={(e) => handleOpenEditor(article.id, e)} className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-senadee-light hover:text-primary transition-colors" title="Edit">
-                            <span className="material-symbols-outlined text-[18px]">edit</span>
-                          </button>
-                          <button onClick={(e) => handleDelete(article.id, e)} className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-error transition-colors cursor-pointer" title="Delete">
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
-                          </button>
-                        </div>
+                        <button onClick={(e) => handleDeleteFromTable(article.id, e)} className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-error transition-colors cursor-pointer" title="Review & Delete">
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -137,13 +133,13 @@ export default function ArticleListPage() {
         </div>
       </div>
 
-      {/* VIEW MODAL */}
-      {viewingArticle && (
-        <div className="fixed inset-0 z-[100] bg-surface/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-fade-in" onClick={handleCloseView}>
-          <div className="bg-surface-container-lowest w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border-muted" onClick={e => e.stopPropagation()}>
+      {/* VIEW DETAIL MODAL (Read-Only, Card Modal) */}
+      {viewingArticle && !deleteConfirm && (
+        <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-fade-in" onClick={handleCloseView}>
+          <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden border border-border-muted" onClick={e => e.stopPropagation()}>
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 border-b border-border-muted bg-surface-container-low/50">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border-muted bg-surface-container-low/50">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary">article</span>
                 <div>
@@ -151,54 +147,87 @@ export default function ArticleListPage() {
                   <p className="font-body-sm text-body-sm text-on-surface-variant font-mono">{viewingArticle.articleId}</p>
                 </div>
               </div>
-              <button onClick={handleCloseView} className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer">
+              <button onClick={handleCloseView} className="p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
 
-            {/* Modal Body */}
+            {/* Modal Body (Read-Only Content) */}
             <div className="p-6 overflow-y-auto flex-1">
-              <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-2">{viewingArticle.title}</h2>
-              <div className="flex items-center gap-4 text-sm text-on-surface-variant mb-8 pb-4 border-b border-border-muted">
-                <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">person</span> {viewingArticle.author}</span>
-                <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">calendar_today</span> {formatDate(viewingArticle.date || viewingArticle.updatedAt)}</span>
-                <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">category</span> {viewingArticle.category}</span>
+              <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-3">{viewingArticle.title}</h2>
+              
+              <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface-variant mb-6 pb-4 border-b border-border-muted">
+                <span className="flex items-center gap-1.5 bg-surface-container px-3 py-1 rounded-full">
+                  <span className="material-symbols-outlined text-[16px]">person</span> {viewingArticle.author}
+                </span>
+                <span className="flex items-center gap-1.5 bg-surface-container px-3 py-1 rounded-full">
+                  <span className="material-symbols-outlined text-[16px]">calendar_today</span> {formatDate(viewingArticle.date || viewingArticle.updatedAt)}
+                </span>
+                <span className="flex items-center gap-1.5 bg-surface-container px-3 py-1 rounded-full">
+                  <span className="material-symbols-outlined text-[16px]">category</span> {viewingArticle.category || '-'}
+                </span>
+                {viewingArticle.isVerified && (
+                  <span className="flex items-center gap-1.5 bg-green-100 text-green-800 px-3 py-1 rounded-full font-semibold">
+                    <span className="material-symbols-outlined text-[16px]">verified</span> Verified
+                  </span>
+                )}
               </div>
               
-              <div className="prose-custom opacity-70">
-                <p className="italic mb-4 text-on-surface-variant">Pratinjau konten kasar (Tidak mencakup layout web sesungguhnya):</p>
+              {/* Read-only content preview */}
+              <div className="space-y-4">
                 {viewingArticle.content?.map((sec, i) => (
-                  <div key={i} className="mb-4">
-                    <h4 className="font-bold text-on-surface mb-1">{sec.heading}</h4>
-                    <p className="text-on-surface-variant text-sm whitespace-pre-line">{sec.text}</p>
+                  <div key={i} className="bg-surface-container-low/30 rounded-xl p-4 border border-border-muted">
+                    <h4 className="font-label-md text-label-md font-bold text-on-surface mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded bg-primary-fixed text-primary text-xs font-bold flex items-center justify-center">{i + 1}</span>
+                      {sec.heading}
+                    </h4>
+                    <p className="text-on-surface-variant text-sm whitespace-pre-line leading-relaxed">{sec.text}</p>
                   </div>
                 ))}
+                {(!viewingArticle.content || viewingArticle.content.length === 0) && (
+                  <p className="text-on-surface-variant italic text-center py-8">Tidak ada konten tersedia untuk pratinjau.</p>
+                )}
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="p-5 border-t border-border-muted bg-surface-container-low/50 flex justify-between items-center">
-              <button onClick={(e) => handleDelete(viewingArticle.id, e)} className="px-4 py-2 text-error font-label-md text-label-md rounded-lg hover:bg-error-container transition-colors cursor-pointer flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px]">delete</span> Hapus
+            <div className="px-6 py-4 border-t border-border-muted bg-surface-container-low/50 flex justify-between items-center">
+              <button onClick={handleCloseView} className="px-5 py-2.5 border border-border-muted text-on-surface rounded-xl font-label-md text-label-md hover:bg-surface-container-low transition-colors cursor-pointer">
+                Tutup
               </button>
-              <div className="flex gap-3">
-                <button onClick={handleCloseView} className="px-4 py-2 text-on-surface font-label-md text-label-md border border-border-muted rounded-lg hover:bg-surface-container transition-colors cursor-pointer">
-                  Tutup
-                </button>
-                <button onClick={(e) => handleOpenEditor(viewingArticle.id, e)} className="px-4 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:bg-primary/90 transition-colors cursor-pointer flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px]">edit</span> Edit Artikel
-                </button>
-              </div>
+              <button onClick={handleRequestDelete} className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-label-md text-label-md font-semibold hover:bg-red-700 transition-colors cursor-pointer flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px]">delete</span>
+                Hapus Artikel
+              </button>
             </div>
-
           </div>
         </div>
       )}
 
-      {/* FULLSCREEN EDITOR MODAL */}
-      {editingId && (
-        <div className="fixed inset-0 z-[110] bg-surface flex flex-col animate-fade-in">
-          <ArticleEditorPage isModal={true} editId={editingId} onClose={handleCloseEditor} />
+      {/* DELETE CONFIRMATION MODAL (Card Modal) */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-[110] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-sm border border-border-muted p-6 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-error-container flex items-center justify-center">
+              <span className="material-symbols-outlined text-on-error-container" style={{ fontSize: '32px' }}>warning</span>
+            </div>
+            <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface mb-2">Hapus Artikel?</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant mb-2">
+              Apakah Anda yakin ingin menghapus:
+            </p>
+            <p className="font-label-md text-label-md font-bold text-on-surface mb-1">{deleteConfirm.title}</p>
+            <p className="font-mono text-xs text-outline mb-6">{deleteConfirm.articleId}</p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={handleCancelDelete}
+                className="px-5 py-2.5 border border-border-muted text-on-surface rounded-xl font-label-md text-label-md hover:bg-surface-container-low transition-colors cursor-pointer">
+                Batal
+              </button>
+              <button onClick={handleConfirmDelete}
+                className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-label-md text-label-md font-semibold hover:bg-red-700 transition-colors cursor-pointer">
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>
