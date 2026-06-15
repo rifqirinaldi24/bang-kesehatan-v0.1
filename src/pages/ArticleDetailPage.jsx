@@ -219,18 +219,40 @@ export default function ArticleDetailPage() {
               {/* Actionable Takeaways */}
               <TakeawaysBox takeaways={article.takeaways} />
 
-              {/* Back button */}
-              <div className="mt-10 pt-8 border-t border-surface-container">
-                <button
-                  onClick={() => navigate(-1)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-brand font-bold text-on-surface-variant hover:text-primary hover:bg-primary-fixed border border-surface-container hover:border-primary-fixed transition-all cursor-pointer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                  </svg>
-                  Kembali
-                </button>
-              </div>
+              {/* Article Reference ID (Opsi B) */}
+              {article.articleId && (
+                <div className="mt-10 pt-8 border-t border-surface-container flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 text-sm text-on-surface-variant font-mono bg-surface-container-low px-3 py-1.5 rounded-lg w-fit">
+                    <span className="material-symbols-outlined text-[16px]">qr_code_2</span>
+                    Ref: {article.articleId}
+                  </div>
+                  
+                  {/* Back button */}
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-brand font-bold text-on-surface-variant hover:text-primary hover:bg-primary-fixed border border-surface-container hover:border-primary-fixed transition-all cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                    </svg>
+                    Kembali
+                  </button>
+                </div>
+              )}
+
+              {!article.articleId && (
+                <div className="mt-10 pt-8 border-t border-surface-container">
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-brand font-bold text-on-surface-variant hover:text-primary hover:bg-primary-fixed border border-surface-container hover:border-primary-fixed transition-all cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                    </svg>
+                    Kembali
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

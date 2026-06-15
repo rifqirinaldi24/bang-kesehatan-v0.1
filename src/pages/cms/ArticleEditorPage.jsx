@@ -1,9 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import CMSHeader from '../../components/cms/CMSHeader';
 import LexicalEditor from '../../components/cms/LexicalEditor';
+import { getAllArticles, saveArticle } from '../../data/articleStore';
+import { useAuth } from '../../context/AuthContext';
 
 export default function ArticleEditorPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('id');
+  const { user } = useAuth();
   // Form Data
   const [topic, setTopic] = useState('');
   const [brief, setBrief] = useState('');
@@ -20,6 +27,51 @@ export default function ArticleEditorPage() {
   // Right column states
   const [publishMode, setPublishMode] = useState('now'); // 'now' or 'schedule'
   const [publishDate, setPublishDate] = useState('');
+
+  // Load data if editing
+  useEffect(() => {
+    if (editId) {
+      const articles = getAllArticles();
+      const articleToEdit = articles.find(a => a.id === parseInt(editId));
+      if (articleToEdit) {
+        setTitle(articleToEdit.title || '');
+        setSlug(articleToEdit.slug || '');
+        setTopic(articleToEdit.title || '');
+        setInitialContent(articleToEdit.content ? JSON.stringify(articleToEdit.content) : ''); // Just mock load
+      }
+    }
+  }, [editId]);
+
+  const handleSaveDraft = () => {
+    const data = {
+      ...(editId ? { id: parseInt(editId) } : {}),
+      title: title || 'Untitled Draft',
+      slug,
+      author: user?.name || 'Unknown Writer',
+      status: 'draft',
+      content: initialContent ? [{ heading: 'Draft Content', text: 'MOCKED CONTENT' }] : []
+    };
+    saveArticle(data);
+    navigate('/cms/drafts');
+  };
+
+  const handlePublish = () => {
+    if (!isVerified) return;
+    const data = {
+      ...(editId ? { id: parseInt(editId) } : {}),
+      title: title || 'Untitled Article',
+      slug: slug || 'untitled-article',
+      author: user?.name || 'Unknown Writer',
+      status: 'published',
+      category: 'general',
+      readingTime: 5,
+      date: new Date().toISOString().split('T')[0],
+      isVerified: true,
+      content: initialContent ? [{ heading: 'Published Content', text: 'MOCKED CONTENT' }] : []
+    };
+    saveArticle(data);
+    navigate('/cms/articles');
+  };
 
   const handleGenerate = async () => {
     if (!topic) return;
@@ -107,10 +159,11 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
 
   const headerActions = (
     <div className="flex gap-2">
-      <button className="px-4 py-2 border border-border-muted text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+      <button onClick={handleSaveDraft} className="px-4 py-2 border border-border-muted text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
         Save Draft
       </button>
       <button
+        onClick={handlePublish}
         disabled={!isVerified}
         className={`px-4 py-2 font-label-md text-label-md rounded-lg transition-colors duration-200 flex items-center gap-2 ${
           isVerified 

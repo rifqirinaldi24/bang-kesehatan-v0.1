@@ -17,10 +17,11 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
   // Menu items dengan permission key
   const allNavItems = [
     { name: 'Dashboard', path: '/cms', icon: 'dashboard', permission: 'dashboard' },
-    { name: 'Content Manager', path: '/cms/editor', icon: 'edit_square', permission: 'editor' },
-    { name: 'AI Generation', path: '/cms/ai', icon: 'auto_awesome', permission: 'ai_generator' },
+    { name: 'Semua Artikel', path: '/cms/articles', icon: 'list_alt', permission: 'editor' },
+    { name: 'Draft Artikel', path: '/cms/drafts', icon: 'edit_document', permission: 'editor' },
+    { name: 'Tulis Baru', path: '/cms/editor', icon: 'edit_square', permission: 'editor' },
     { name: 'User Directory', path: '/cms/users', icon: 'group', permission: 'manage_users' },
-    { name: 'Analytics', path: '/cms/analytics', icon: 'bar_chart', permission: 'analytics' },
+    { name: 'Audit Trail', path: '/cms/audit', icon: 'history', permission: 'manage_roles' },
   ];
 
   const allBottomNavItems = [

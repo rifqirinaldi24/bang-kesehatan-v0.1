@@ -40,6 +40,7 @@ export const PILLARS = [
 export const articles = [
   {
     id: 1,
+    articleId: 'SND-001',
     slug: 'mitos-dan-fakta-nutrisi-anak',
     title: 'Mitos dan Fakta Nutrisi Anak: Panduan Lengkap untuk Orang Tua',
     excerpt: 'Banyak mitos beredar soal nutrisi anak. Yuk, bedakan mana yang fakta dan mana yang sekadar mitos agar si kecil tumbuh sehat optimal.',
@@ -83,6 +84,7 @@ export const articles = [
   },
   {
     id: 2,
+    articleId: 'SND-002',
     slug: 'panduan-mpasi-6-bulan-pertama',
     title: 'Panduan Lengkap MPASI: Menu Sehat untuk 6 Bulan Pertama',
     excerpt: 'Memulai MPASI bisa jadi membingungkan bagi orang tua baru. Simak panduan lengkap dari ahli gizi tentang menu dan jadwal MPASI yang tepat.',
@@ -122,6 +124,7 @@ export const articles = [
   },
   {
     id: 3,
+    articleId: 'SND-003',
     slug: 'olahraga-rumahan-ibu-bekerja',
     title: '7 Olahraga Rumahan Efektif untuk Ibu Bekerja: Cukup 15 Menit!',
     excerpt: 'Tidak punya waktu ke gym? Olahraga rumahan ini bisa dilakukan kapan saja dan terbukti efektif menjaga kebugaran tubuh ibu bekerja.',
@@ -156,6 +159,7 @@ export const articles = [
   },
   {
     id: 4,
+    articleId: 'SND-004',
     slug: 'vaksinasi-anak-jadwal-lengkap',
     title: 'Jadwal Vaksinasi Anak 2026: Panduan Lengkap Imunisasi Wajib & Tambahan',
     excerpt: 'Vaksinasi adalah langkah pencegahan paling efektif untuk melindungi anak dari penyakit berbahaya. Ketahui jadwal lengkap dan jenis vaksin yang dibutuhkan.',
@@ -195,6 +199,7 @@ export const articles = [
   },
   {
     id: 5,
+    articleId: 'SND-005',
     slug: 'mengelola-screen-time-anak',
     title: 'Panduan Mengelola Screen Time Anak di Era Digital: Berapa Lama yang Aman?',
     excerpt: 'Screen time berlebihan berdampak buruk pada perkembangan anak. Pelajari batasan yang direkomendasikan dan tips mengelola waktu layar.',
@@ -230,6 +235,7 @@ export const articles = [
   },
   {
     id: 6,
+    articleId: 'SND-006',
     slug: 'resep-smoothie-bowl-sehat',
     title: '5 Resep Smoothie Bowl Bernutrisi Tinggi untuk Sarapan Keluarga',
     excerpt: 'Sarapan sehat tidak harus ribet! Coba 5 resep smoothie bowl yang kaya nutrisi, mudah dibuat, dan disukai seluruh keluarga.',
@@ -265,6 +271,7 @@ export const articles = [
   },
   {
     id: 7,
+    articleId: 'SND-007',
     slug: 'deteksi-dini-diabetes-keluarga',
     title: 'Deteksi Dini Diabetes: Tanda-Tanda yang Sering Diabaikan Keluarga Muda',
     excerpt: 'Diabetes tipe 2 semakin banyak menyerang usia muda. Kenali tanda-tanda awal dan langkah pencegahan yang bisa dilakukan seluruh keluarga.',
@@ -300,6 +307,7 @@ export const articles = [
   },
   {
     id: 8,
+    articleId: 'SND-008',
     slug: 'yoga-untuk-pemula-di-rumah',
     title: 'Yoga untuk Pemula: 10 Pose Dasar yang Bisa Dilakukan di Rumah',
     excerpt: 'Mulai perjalanan yoga Anda dari rumah! 10 pose dasar ini cocok untuk pemula dan membantu mengurangi stres serta meningkatkan fleksibilitas.',

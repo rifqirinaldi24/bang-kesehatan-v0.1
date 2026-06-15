@@ -14,6 +14,9 @@ import ArticleEditorPage from './pages/cms/ArticleEditorPage.jsx';
 import UserDirectoryPage from './pages/cms/UserDirectoryPage.jsx';
 import RoleManagerPage from './pages/cms/RoleManagerPage.jsx';
 import AccessDeniedPage from './pages/cms/AccessDeniedPage.jsx';
+import ArticleListPage from './pages/cms/ArticleListPage.jsx';
+import DraftListPage from './pages/cms/DraftListPage.jsx';
+import AuditTrailPage from './pages/cms/AuditTrailPage.jsx';
 import MyProfilePage from './pages/cms/MyProfilePage.jsx';
 import ForceResetPasswordPage from './pages/cms/ForceResetPasswordPage.jsx';
 import './index.css';
@@ -44,6 +47,8 @@ createRoot(document.getElementById('root')).render(
             <Route element={<ProtectedRoute />}>
               <Route path="/cms" element={<CMSLayout />}>
                 <Route index element={<DashboardPage />} />
+                <Route path="articles" element={<ArticleListPage />} />
+                <Route path="drafts" element={<DraftListPage />} />
                 <Route path="editor" element={<ArticleEditorPage />} />
                 <Route path="profile" element={<MyProfilePage />} />
               </Route>
@@ -61,6 +66,7 @@ createRoot(document.getElementById('root')).render(
             <Route element={<ProtectedRoute requiredPermission="manage_roles" />}>
               <Route path="/cms" element={<CMSLayout />}>
                 <Route path="roles" element={<RoleManagerPage />} />
+                <Route path="audit" element={<AuditTrailPage />} />
               </Route>
             </Route>
           </Routes>
