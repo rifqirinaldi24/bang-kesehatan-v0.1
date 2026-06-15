@@ -20,6 +20,7 @@ import AuditTrailPage from './pages/cms/AuditTrailPage.jsx';
 import CategoryParameterPage from './pages/cms/CategoryParameterPage.jsx';
 import MenuOrderPage from './pages/cms/MenuOrderPage.jsx';
 import DataParameterPage from './pages/cms/DataParameterPage.jsx';
+import LogProcessPage from './pages/cms/LogProcessPage.jsx';
 import MyProfilePage from './pages/cms/MyProfilePage.jsx';
 import ForceResetPasswordPage from './pages/cms/ForceResetPasswordPage.jsx';
 import './index.css';
@@ -54,6 +55,7 @@ createRoot(document.getElementById('root')).render(
                 <Route path="drafts" element={<DraftListPage />} />
                 <Route path="editor" element={<ArticleEditorPage />} />
                 <Route path="audit" element={<AuditTrailPage />} />
+                <Route path="log-process" element={<LogProcessPage />} />
                 <Route path="profile" element={<MyProfilePage />} />
               </Route>
               <Route path="/cms/force-reset" element={<ForceResetPasswordPage />} />

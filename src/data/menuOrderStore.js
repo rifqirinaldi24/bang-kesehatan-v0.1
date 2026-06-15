@@ -13,6 +13,7 @@ const DEFAULT_MENU_ORDER = [
   { id: 'editor',       name: 'Tulis Baru',         icon: 'edit_square',       path: '/cms/editor',    permission: 'editor',       section: 'main', visible: true, order: 4 },
   { id: 'users',        name: 'User Directory',     icon: 'group',             path: '/cms/users',     permission: 'manage_users', section: 'main', visible: true, order: 5 },
   { id: 'audit',        name: 'Audit Trail',        icon: 'history',           path: '/cms/audit',     permission: 'dashboard',    section: 'main', visible: true, order: 6 },
+  { id: 'log-process',  name: 'Log Process',        icon: 'receipt_long',      path: '/cms/log-process', permission: 'editor',     section: 'main', visible: true, order: 7 },
   // Bottom Nav
   { id: 'categories',   name: 'Parameter Kategori', icon: 'category',          path: '/cms/categories',  permission: 'settings', section: 'bottom', visible: true, order: 1 },
   { id: 'menu-order',   name: 'Urutan Menu',        icon: 'reorder',           path: '/cms/menu-order',  permission: 'settings', section: 'bottom', visible: true, order: 2 },

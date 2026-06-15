@@ -18,6 +18,22 @@ export default function ArticleListPage() {
     refreshArticles();
   }, []);
 
+  // ESC Keyboard Listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (deleteConfirm) {
+          setDeleteConfirm(null);
+        } else if (viewingArticle) {
+          setViewingArticle(null);
+          document.body.style.overflow = '';
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [deleteConfirm, viewingArticle]);
+
   const handleRowClick = (article) => {
     setViewingArticle(article);
     document.body.style.overflow = 'hidden';

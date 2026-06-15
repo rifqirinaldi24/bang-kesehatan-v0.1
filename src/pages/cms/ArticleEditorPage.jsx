@@ -6,6 +6,7 @@ import LexicalEditor from '../../components/cms/LexicalEditor';
 import Toast from '../../components/ui/Toast';
 import { getAllArticles, saveArticle } from '../../data/articleStore';
 import { getActiveCategories } from '../../data/categoryStore';
+import { addLog } from '../../data/logStore';
 import { useAuth } from '../../context/AuthContext';
 
 export default function ArticleEditorPage({ isModal = false, editId: propEditId = null, onClose }) {
@@ -49,6 +50,18 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
     }
   }, [internalEditId]);
 
+  // ESC Keyboard Listener for Modal
+  useEffect(() => {
+    if (!isModal) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && onClose) {
+        onClose(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModal, onClose]);
+
   const handleSaveDraft = () => {
     const data = {
       ...(internalEditId ? { id: parseInt(internalEditId) } : {}),
@@ -62,6 +75,14 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
     const saved = saveArticle(data);
     setInternalEditId(saved.id);
     setToastMessage('✅ Draft berhasil disimpan!');
+    
+    // Create log for save draft
+    addLog({
+      action: 'Save Draft',
+      articleTitle: data.title,
+      actor: user?.name || 'Unknown',
+      status: 'Success'
+    });
     
     // Jika modal, jangan auto-close agar penulis bisa lanjut ngetik
     // Jika butuh tutup, biarkan user klik "Kembali/Close"
@@ -82,6 +103,14 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       content: initialContent ? [{ heading: 'Published Content', text: 'MOCKED CONTENT' }] : []
     };
     saveArticle(data);
+    
+    // Create log for publish
+    addLog({
+      action: publishMode === 'schedule' ? 'Schedule Publish' : 'Publish',
+      articleTitle: data.title,
+      actor: user?.name || 'Unknown',
+      status: 'Success'
+    });
     
     if (isModal && onClose) {
       onClose(true); // true = indicate success/refresh needed
@@ -224,65 +253,66 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
       <div className={`flex-1 flex flex-col lg:flex-row gap-gutter mx-auto w-full mb-10 ${isModal ? 'p-6 max-w-7xl' : 'p-margin-mobile md:p-gutter max-w-container-max'}`}>
         
         {/* --- LEFT COLUMN --- */}
-        <div className="flex-1 flex flex-col gap-6 min-w-0">
-          
-          {/* 1. AI Generate Card */}
-          <div className="bg-primary-fixed/20 border border-primary-container rounded-xl p-6 relative">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-outlined text-primary">auto_awesome</span>
-              <h3 className="font-label-md text-label-md font-bold text-on-surface">AI Generator</h3>
-            </div>
-            
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="font-label-md text-label-md font-bold text-on-surface">Jenis Artikel</label>
-                <select
-                  value={articleType}
-                  onChange={(e) => setArticleType(e.target.value)}
-                  className="w-full bg-surface border border-primary-container rounded-lg font-body-md text-body-md p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                >
-                  <option value="general">Artikel General</option>
-                  <option value="spesifik">Artikel Spesifik</option>
-                </select>
+        <div className="w-full lg:w-2/3 flex flex-col gap-6">
+          {(!internalEditId && !isModal) && (
+            <div className="bg-surface-container-lowest rounded-xl border border-border-muted p-5 sm:p-6 lg:p-8 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-primary text-[24px]">smart_toy</span>
+                <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">AI Medical Writer Assistant</h2>
               </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="font-label-md text-label-md font-bold text-on-surface">Topik / Keyword</label>
-                <input
-                  type="text"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g. Type 2 Diabetes Symptoms"
-                  className="w-full bg-surface border border-outline-variant rounded-lg font-body-md text-body-md p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-                />
-              </div>
+              <p className="font-body-md text-body-md text-on-surface-variant mb-6">Masukkan topik spesifik dan brief untuk di-generate sebagai draf artikel.</p>
               
-              <div>
-                <label className="font-label-sm text-label-sm font-medium text-on-surface-variant block mb-1">Brief / Instructions (Optional)</label>
-                <textarea
-                  value={brief}
-                  onChange={(e) => setBrief(e.target.value)}
-                  placeholder="e.g. Focus on early warning signs..."
-                  className="w-full bg-surface border border-outline-variant rounded-lg font-body-md text-body-md p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none h-20"
-                ></textarea>
-              </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="font-label-md text-label-md font-bold text-on-surface">Jenis Artikel</label>
+                  <select
+                    value={articleType}
+                    onChange={(e) => setArticleType(e.target.value)}
+                    className="w-full bg-surface border border-primary-container rounded-lg font-body-md text-body-md p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                  >
+                    <option value="general">Artikel General</option>
+                    <option value="spesifik">Artikel Spesifik</option>
+                  </select>
+                </div>
 
-              <div className="flex justify-end">
-                <button
-                  onClick={handleGenerate}
-                  disabled={!topic || isGenerating}
-                  className="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-                >
-                  {isGenerating ? (
-                    <span className="material-symbols-outlined animate-spin">sync</span>
-                  ) : (
-                    <span className="material-symbols-outlined">magic_button</span>
-                  )}
-                  {isGenerating ? 'Generating...' : (hasGenerated ? 'Regenerate Draft' : 'Generate Draft')}
-                </button>
+                <div className="flex flex-col gap-2">
+                  <label className="font-label-md text-label-md font-bold text-on-surface">Topik / Keyword</label>
+                  <input
+                    type="text"
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    placeholder="e.g. Type 2 Diabetes Symptoms"
+                    className="w-full bg-surface border border-outline-variant rounded-lg font-body-md text-body-md p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                  />
+                </div>
+                
+                <div>
+                  <label className="font-label-sm text-label-sm font-medium text-on-surface-variant block mb-1">Brief / Instructions (Optional)</label>
+                  <textarea
+                    value={brief}
+                    onChange={(e) => setBrief(e.target.value)}
+                    placeholder="e.g. Focus on early warning signs..."
+                    className="w-full bg-surface border border-outline-variant rounded-lg font-body-md text-body-md p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none h-20"
+                  ></textarea>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleGenerate}
+                    disabled={!topic || isGenerating}
+                    className="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+                  >
+                    {isGenerating ? (
+                      <span className="material-symbols-outlined animate-spin">sync</span>
+                    ) : (
+                      <span className="material-symbols-outlined">magic_button</span>
+                    )}
+                    {isGenerating ? 'Generating...' : (hasGenerated ? 'Regenerate Draft' : 'Generate Draft')}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* 2. Image Upload (Compact) */}
           <div className="bg-surface-container-lowest rounded-xl border border-border-muted border-dashed p-4 flex items-center gap-4 group cursor-pointer hover:bg-surface-container-low transition-colors">
