@@ -157,12 +157,8 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
         },
       ];
       const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash-8b", 
-        safetySettings,
-        generationConfig: {
-          maxOutputTokens: 1500,
-          temperature: 0.7,
-        }
+        model: "gemini-1.5-flash", 
+        safetySettings
       });
 
       const wordCountRule = articleType === 'general' ? 'Maksimal 500 - 600 kata' : 'Maksimal 350 - 400 kata';
