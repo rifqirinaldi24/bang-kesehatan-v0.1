@@ -6,13 +6,13 @@ const STORAGE_KEY = 'senadee_parameters';
 
 const DEFAULT_PARAMETERS = [
   // General
-  { key: 'site_name',              label: 'Nama Situs',                value: 'Bang Kesehatan',                    type: 'text',     group: 'General',  description: 'Nama utama situs yang ditampilkan di header dan SEO.' },
+  { key: 'site_name',              label: 'Nama Situs',                value: 'Senadee',                    type: 'text',     group: 'General',  description: 'Nama utama situs yang ditampilkan di header dan SEO.' },
   { key: 'site_tagline',           label: 'Tagline',                   value: 'Pikiran Tenang, Langkah Sehat',     type: 'text',     group: 'General',  description: 'Slogan/tagline situs.' },
-  { key: 'contact_email',          label: 'Email Kontak',              value: 'hello@bangkesehatan.com',           type: 'text',     group: 'General',  description: 'Email utama untuk kontak publik.' },
-  { key: 'footer_text',            label: 'Teks Footer',               value: '© 2026 Bang Kesehatan. All rights reserved.', type: 'text', group: 'General', description: 'Teks copyright di footer.' },
+  { key: 'contact_email',          label: 'Email Kontak',              value: 'hello@senadee.com',           type: 'text',     group: 'General',  description: 'Email utama untuk kontak publik.' },
+  { key: 'footer_text',            label: 'Teks Footer',               value: '© 2026 Senadee. All rights reserved.', type: 'text', group: 'General', description: 'Teks copyright di footer.' },
 
   // SEO
-  { key: 'meta_title_suffix',      label: 'Suffix Meta Title',         value: ' - Bang Kesehatan',                 type: 'text',     group: 'SEO',      description: 'Ditambahkan di akhir setiap title tag halaman.' },
+  { key: 'meta_title_suffix',      label: 'Suffix Meta Title',         value: ' - Senadee',                 type: 'text',     group: 'SEO',      description: 'Ditambahkan di akhir setiap title tag halaman.' },
   { key: 'default_meta_description', label: 'Meta Description Default', value: 'Portal kesehatan terpercaya untuk keluarga Indonesia.', type: 'textarea', group: 'SEO', description: 'Deskripsi default jika halaman tidak punya meta description sendiri.' },
   { key: 'og_image_url',           label: 'OG Image URL',              value: '/logo.png',                         type: 'text',     group: 'SEO',      description: 'URL gambar default untuk Open Graph sharing.' },
 

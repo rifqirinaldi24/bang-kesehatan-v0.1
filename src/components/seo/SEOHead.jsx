@@ -1,10 +1,10 @@
 import { Helmet } from 'react-helmet-async';
 
 export default function SEOHead({ title, description, path = '' }) {
-  const siteName = 'Bang Kesehatan';
-  const fullTitle = title ? `${title} — ${siteName}` : `${siteName} — Media Kesehatan Tepercaya`;
+  const siteName = 'Senadee';
+  const fullTitle = title ? `${title} — ${siteName}` : `${siteName} — Portal Kesehatan Preventif`;
   const defaultDescription =
-    'Bang Kesehatan adalah portal media kesehatan tepercaya untuk keluarga muda Indonesia. Semua konten diverifikasi oleh tim medis profesional.';
+    'Senadee adalah portal media kesehatan tepercaya untuk keluarga muda Indonesia. Semua konten diverifikasi oleh tim medis profesional.';
 
   return (
     <Helmet>
