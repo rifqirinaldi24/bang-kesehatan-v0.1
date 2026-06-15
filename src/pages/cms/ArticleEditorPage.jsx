@@ -113,6 +113,14 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
     }
   };
 
+  const handleRemoveImage = (e) => {
+    e.stopPropagation(); // Mencegah event click merambat ke parent div
+    setImageUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''; // Reset input file
+    }
+  };
+
   const handlePublish = () => {
     if (!isVerified) return;
     
@@ -383,12 +391,23 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
               accept="image/*" 
               onChange={handleImageUpload} 
             />
-            <button 
-              type="button"
-              className="px-4 py-2 bg-surface text-on-surface-variant border border-border-muted rounded-lg font-label-sm text-label-sm group-hover:border-primary transition-colors cursor-pointer"
-            >
-              {imageUrl ? 'Ganti' : 'Browse'}
-            </button>
+            <div className="flex gap-2">
+              {imageUrl && (
+                <button 
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="px-4 py-2 bg-error-container text-on-error-container border border-transparent rounded-lg font-label-sm text-label-sm hover:opacity-90 transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+              )}
+              <button 
+                type="button"
+                className="px-4 py-2 bg-surface text-on-surface-variant border border-border-muted rounded-lg font-label-sm text-label-sm group-hover:border-primary transition-colors cursor-pointer"
+              >
+                {imageUrl ? 'Ganti' : 'Browse'}
+              </button>
+            </div>
           </div>
 
           {/* 3. Title */}
