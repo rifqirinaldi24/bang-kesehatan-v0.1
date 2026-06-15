@@ -156,10 +156,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
           threshold: HarmBlockThreshold.BLOCK_NONE,
         },
       ];
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash", 
-        safetySettings
-      });
+      const model = genAI.getGenerativeModel({ model: "gemini-flash-latest", safetySettings });
 
       const wordCountRule = articleType === 'general' ? 'Maksimal 500 - 600 kata' : 'Maksimal 350 - 400 kata';
 
@@ -206,7 +203,7 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
       setHasGenerated(true);
     } catch (error) {
       console.error("Error generating content:", error);
-      alert("Terjadi kesalahan saat memanggil AI. Silakan cek console untuk detailnya.");
+      alert("AI Error: " + (error?.message || error) + "\n\nCek koneksi internet atau kuota API Key Gemini Anda.");
     } finally {
       setIsGenerating(false);
     }
