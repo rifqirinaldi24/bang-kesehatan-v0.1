@@ -156,16 +156,9 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
           threshold: HarmBlockThreshold.BLOCK_NONE,
         },
       ];
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-flash-latest", 
-        safetySettings,
-        generationConfig: {
-          maxOutputTokens: 800,
-          temperature: 0.7,
-        }
-      });
+      const model = genAI.getGenerativeModel({ model: "gemini-flash-latest", safetySettings });
 
-      const wordCountRule = articleType === 'general' ? 'Maksimal 200 - 250 kata' : 'Maksimal 150 - 200 kata';
+      const wordCountRule = articleType === 'general' ? 'Maksimal 500 - 600 kata' : 'Maksimal 350 - 400 kata';
 
       const prompt = `Anda adalah penulis medis/kesehatan Senior untuk portal "Senadee".
 Tugas Anda adalah menulis artikel kesehatan yang berbobot, akurat, empatik, dan mudah dipahami.
