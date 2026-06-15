@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
+import { getMenusBySection } from '../../data/menuOrderStore';
 
 export default function CMSSidebar({ collapsed, setCollapsed }) {
   const { user, logout, hasPermission } = useAuth();
@@ -14,25 +15,20 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
     logout();
   };
 
-  // Menu items dengan permission key
-  const allNavItems = [
-    { name: 'Dashboard', path: '/cms', icon: 'dashboard', permission: 'dashboard' },
-    { name: 'Semua Artikel', path: '/cms/articles', icon: 'list_alt', permission: 'editor' },
-    { name: 'Draft Artikel', path: '/cms/drafts', icon: 'edit_document', permission: 'editor' },
-    { name: 'Tulis Baru', path: '/cms/editor', icon: 'edit_square', permission: 'editor' },
-    { name: 'User Directory', path: '/cms/users', icon: 'group', permission: 'manage_users' },
-    { name: 'Audit Trail', path: '/cms/audit', icon: 'history', permission: 'dashboard' },
-  ];
+  // Read menu order from store (dynamically ordered)
+  const allMainMenus = getMenusBySection('main');
+  const allBottomMenus = getMenusBySection('bottom');
 
-  const allBottomNavItems = [
-    { name: 'Role Manager', path: '/cms/roles', icon: 'admin_panel_settings', permission: 'manage_roles' },
-    { name: 'Settings', path: '/cms/settings', icon: 'settings', permission: 'settings' },
-    { name: 'System Status', path: '/cms/status', icon: 'check_circle', permission: null },
-  ];
+  // Filter berdasarkan permission & visibility
+  const navItems = allMainMenus
+    .filter(item => item.visible)
+    .filter(item => !item.permission || hasPermission(item.permission))
+    .map(item => ({ name: item.name, path: item.path, icon: item.icon, permission: item.permission }));
 
-  // Filter berdasarkan permission
-  const navItems = allNavItems.filter(item => !item.permission || hasPermission(item.permission));
-  const bottomNavItems = allBottomNavItems.filter(item => !item.permission || hasPermission(item.permission));
+  const bottomNavItems = allBottomMenus
+    .filter(item => item.visible)
+    .filter(item => !item.permission || hasPermission(item.permission))
+    .map(item => ({ name: item.name, path: item.path, icon: item.icon, permission: item.permission }));
 
   return (
     <nav 

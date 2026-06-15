@@ -198,13 +198,13 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
   );
 
   return (
-    <div className={`flex flex-col h-full relative ${isModal ? 'bg-surface overflow-y-auto' : ''}`}>
+    <div className={`flex flex-col relative ${isModal ? 'h-full overflow-y-auto' : ''}`}>
       <Toast message={toastMessage} onClose={() => setToastMessage('')} />
       
       {isModal ? (
-        <div className="sticky top-0 z-30 bg-surface/80 backdrop-blur-xl border-b border-border-muted p-4 flex items-center justify-between">
-          <div>
-            <h1 className="font-headline-md text-headline-md font-bold text-on-surface line-clamp-1">{title || 'New Article'}</h1>
+        <div className="sticky top-0 z-30 bg-surface-container-low/80 backdrop-blur-xl border-b border-border-muted px-6 py-4 flex items-center justify-between">
+          <div className="min-w-0 flex-1 mr-4">
+            <h1 className="font-headline-sm text-headline-sm font-bold text-on-surface line-clamp-1">{title || 'New Article'}</h1>
             <p className="font-body-sm text-body-sm text-on-surface-variant">Editor Mode</p>
           </div>
           {headerActions}

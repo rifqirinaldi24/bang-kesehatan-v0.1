@@ -17,6 +17,9 @@ import AccessDeniedPage from './pages/cms/AccessDeniedPage.jsx';
 import ArticleListPage from './pages/cms/ArticleListPage.jsx';
 import DraftListPage from './pages/cms/DraftListPage.jsx';
 import AuditTrailPage from './pages/cms/AuditTrailPage.jsx';
+import CategoryParameterPage from './pages/cms/CategoryParameterPage.jsx';
+import MenuOrderPage from './pages/cms/MenuOrderPage.jsx';
+import DataParameterPage from './pages/cms/DataParameterPage.jsx';
 import MyProfilePage from './pages/cms/MyProfilePage.jsx';
 import ForceResetPasswordPage from './pages/cms/ForceResetPasswordPage.jsx';
 import './index.css';
@@ -67,6 +70,15 @@ createRoot(document.getElementById('root')).render(
             <Route element={<ProtectedRoute requiredPermission="manage_roles" />}>
               <Route path="/cms" element={<CMSLayout />}>
                 <Route path="roles" element={<RoleManagerPage />} />
+              </Route>
+            </Route>
+
+            {/* CMS Protected Routes — Settings (butuh settings = Superuser only) */}
+            <Route element={<ProtectedRoute requiredPermission="settings" />}>
+              <Route path="/cms" element={<CMSLayout />}>
+                <Route path="categories" element={<CategoryParameterPage />} />
+                <Route path="menu-order" element={<MenuOrderPage />} />
+                <Route path="parameters" element={<DataParameterPage />} />
               </Route>
             </Route>
           </Routes>

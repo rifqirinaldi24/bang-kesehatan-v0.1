@@ -147,10 +147,12 @@ export default function DraftListPage() {
         </div>
       </div>
 
-      {/* FULLSCREEN EDITOR MODAL */}
+      {/* CARD EDITOR MODAL */}
       {editingId && (
-        <div className="fixed inset-0 z-[100] bg-surface flex flex-col animate-fade-in">
-          <ArticleEditorPage isModal={true} editId={editingId} onClose={handleCloseEditor} />
+        <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onClick={() => handleCloseEditor(false)}>
+          <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] border border-border-muted overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <ArticleEditorPage isModal={true} editId={editingId} onClose={handleCloseEditor} />
+          </div>
         </div>
       )}
     </>
