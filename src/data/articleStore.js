@@ -26,14 +26,18 @@ export function getAllArticles() {
  */
 export function saveArticle(articleData) {
   const articles = getAllArticles();
+  let savedArticle;
   
   // If it has an ID, update it
   if (articleData.id) {
     const index = articles.findIndex(a => a.id === articleData.id);
     if (index !== -1) {
       articles[index] = { ...articles[index], ...articleData, updatedAt: new Date().toISOString() };
+      savedArticle = articles[index];
     } else {
-      articles.push({ ...articleData, updatedAt: new Date().toISOString() });
+      const newArt = { ...articleData, updatedAt: new Date().toISOString() };
+      articles.push(newArt);
+      savedArticle = newArt;
     }
   } else {
     // New article
@@ -48,10 +52,11 @@ export function saveArticle(articleData) {
       updatedAt: new Date().toISOString()
     };
     articles.push(newArticle);
+    savedArticle = newArticle;
   }
   
   localStorage.setItem(STORAGE_KEY, JSON.stringify(articles));
-  return articles;
+  return savedArticle;
 }
 
 /**

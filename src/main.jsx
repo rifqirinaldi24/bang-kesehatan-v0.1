@@ -50,6 +50,7 @@ createRoot(document.getElementById('root')).render(
                 <Route path="articles" element={<ArticleListPage />} />
                 <Route path="drafts" element={<DraftListPage />} />
                 <Route path="editor" element={<ArticleEditorPage />} />
+                <Route path="audit" element={<AuditTrailPage />} />
                 <Route path="profile" element={<MyProfilePage />} />
               </Route>
               <Route path="/cms/force-reset" element={<ForceResetPasswordPage />} />
@@ -66,7 +67,6 @@ createRoot(document.getElementById('root')).render(
             <Route element={<ProtectedRoute requiredPermission="manage_roles" />}>
               <Route path="/cms" element={<CMSLayout />}>
                 <Route path="roles" element={<RoleManagerPage />} />
-                <Route path="audit" element={<AuditTrailPage />} />
               </Route>
             </Route>
           </Routes>

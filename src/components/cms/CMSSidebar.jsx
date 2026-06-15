@@ -21,7 +21,7 @@ export default function CMSSidebar({ collapsed, setCollapsed }) {
     { name: 'Draft Artikel', path: '/cms/drafts', icon: 'edit_document', permission: 'editor' },
     { name: 'Tulis Baru', path: '/cms/editor', icon: 'edit_square', permission: 'editor' },
     { name: 'User Directory', path: '/cms/users', icon: 'group', permission: 'manage_users' },
-    { name: 'Audit Trail', path: '/cms/audit', icon: 'history', permission: 'manage_roles' },
+    { name: 'Audit Trail', path: '/cms/audit', icon: 'history', permission: 'dashboard' },
   ];
 
   const allBottomNavItems = [

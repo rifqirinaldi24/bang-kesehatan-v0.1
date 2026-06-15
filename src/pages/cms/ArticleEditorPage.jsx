@@ -3,13 +3,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import CMSHeader from '../../components/cms/CMSHeader';
 import LexicalEditor from '../../components/cms/LexicalEditor';
+import Toast from '../../components/ui/Toast';
 import { getAllArticles, saveArticle } from '../../data/articleStore';
 import { useAuth } from '../../context/AuthContext';
 
-export default function ArticleEditorPage() {
+export default function ArticleEditorPage({ isModal = false, editId: propEditId = null, onClose }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const editId = searchParams.get('id');
+  const urlEditId = searchParams.get('id');
+  const [internalEditId, setInternalEditId] = useState(propEditId || urlEditId);
   const { user } = useAuth();
   // Form Data
   const [topic, setTopic] = useState('');
@@ -28,11 +30,13 @@ export default function ArticleEditorPage() {
   const [publishMode, setPublishMode] = useState('now'); // 'now' or 'schedule'
   const [publishDate, setPublishDate] = useState('');
 
+  const [toastMessage, setToastMessage] = useState('');
+
   // Load data if editing
   useEffect(() => {
-    if (editId) {
+    if (internalEditId) {
       const articles = getAllArticles();
-      const articleToEdit = articles.find(a => a.id === parseInt(editId));
+      const articleToEdit = articles.find(a => a.id === parseInt(internalEditId));
       if (articleToEdit) {
         setTitle(articleToEdit.title || '');
         setSlug(articleToEdit.slug || '');
@@ -40,25 +44,29 @@ export default function ArticleEditorPage() {
         setInitialContent(articleToEdit.content ? JSON.stringify(articleToEdit.content) : ''); // Just mock load
       }
     }
-  }, [editId]);
+  }, [internalEditId]);
 
   const handleSaveDraft = () => {
     const data = {
-      ...(editId ? { id: parseInt(editId) } : {}),
+      ...(internalEditId ? { id: parseInt(internalEditId) } : {}),
       title: title || 'Untitled Draft',
       slug,
       author: user?.name || 'Unknown Writer',
       status: 'draft',
       content: initialContent ? [{ heading: 'Draft Content', text: 'MOCKED CONTENT' }] : []
     };
-    saveArticle(data);
-    navigate('/cms/drafts');
+    const saved = saveArticle(data);
+    setInternalEditId(saved.id);
+    setToastMessage('✅ Draft berhasil disimpan!');
+    
+    // Jika modal, jangan auto-close agar penulis bisa lanjut ngetik
+    // Jika butuh tutup, biarkan user klik "Kembali/Close"
   };
 
   const handlePublish = () => {
     if (!isVerified) return;
     const data = {
-      ...(editId ? { id: parseInt(editId) } : {}),
+      ...(internalEditId ? { id: parseInt(internalEditId) } : {}),
       title: title || 'Untitled Article',
       slug: slug || 'untitled-article',
       author: user?.name || 'Unknown Writer',
@@ -70,7 +78,12 @@ export default function ArticleEditorPage() {
       content: initialContent ? [{ heading: 'Published Content', text: 'MOCKED CONTENT' }] : []
     };
     saveArticle(data);
-    navigate('/cms/articles');
+    
+    if (isModal && onClose) {
+      onClose(true); // true = indicate success/refresh needed
+    } else {
+      navigate('/cms/articles');
+    }
   };
 
   const handleGenerate = async () => {
@@ -159,6 +172,11 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
 
   const headerActions = (
     <div className="flex gap-2">
+      {isModal && (
+        <button onClick={() => onClose(false)} className="px-4 py-2 border border-border-muted text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+          Batal
+        </button>
+      )}
       <button onClick={handleSaveDraft} className="px-4 py-2 border border-border-muted text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
         Save Draft
       </button>
@@ -180,14 +198,26 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
   );
 
   return (
-    <>
-      <CMSHeader 
-        title={title || 'New Article'} 
-        subtitle="Content Manager" 
-        headerActions={headerActions} 
-      />
+    <div className={`flex flex-col h-full relative ${isModal ? 'bg-surface overflow-y-auto' : ''}`}>
+      <Toast message={toastMessage} onClose={() => setToastMessage('')} />
       
-      <div className="flex-1 flex flex-col lg:flex-row p-margin-mobile md:p-gutter gap-gutter max-w-container-max mx-auto w-full mb-10">
+      {isModal ? (
+        <div className="sticky top-0 z-30 bg-surface/80 backdrop-blur-xl border-b border-border-muted p-4 flex items-center justify-between">
+          <div>
+            <h1 className="font-headline-md text-headline-md font-bold text-on-surface line-clamp-1">{title || 'New Article'}</h1>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">Editor Mode</p>
+          </div>
+          {headerActions}
+        </div>
+      ) : (
+        <CMSHeader 
+          title={title || 'New Article'} 
+          subtitle="Content Manager" 
+          headerActions={headerActions} 
+        />
+      )}
+      
+      <div className={`flex-1 flex flex-col lg:flex-row gap-gutter mx-auto w-full mb-10 ${isModal ? 'p-6 max-w-7xl' : 'p-margin-mobile md:p-gutter max-w-container-max'}`}>
         
         {/* --- LEFT COLUMN --- */}
         <div className="flex-1 flex flex-col gap-6 min-w-0">
@@ -433,6 +463,6 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
 
         </aside>
       </div>
-    </>
+    </div>
   );
 }

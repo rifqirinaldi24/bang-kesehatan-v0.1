@@ -4,13 +4,15 @@ import CMSHeader from '../../components/cms/CMSHeader';
 import { getAllArticles, deleteArticle } from '../../data/articleStore';
 import { formatDate } from '../../data/articles';
 import { useAuth } from '../../context/AuthContext';
+import ArticleEditorPage from './ArticleEditorPage';
 
 export default function DraftListPage() {
   const [drafts, setDrafts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingId, setEditingId] = useState(null);
   const { user } = useAuth();
 
-  useEffect(() => {
+  const refreshDrafts = () => {
     // Only show draft articles
     const allDrafts = getAllArticles().filter(a => a.status === 'draft');
     
@@ -23,18 +25,30 @@ export default function DraftListPage() {
     }
     
     setDrafts(filteredDrafts);
+  };
+
+  useEffect(() => {
+    refreshDrafts();
   }, [user]);
 
-  const handleDelete = (id) => {
+  const handleDelete = (id, e) => {
+    e.stopPropagation();
     if (window.confirm("Apakah Anda yakin ingin menghapus draf ini?")) {
       deleteArticle(id);
-      
-      const allDrafts = getAllArticles().filter(a => a.status === 'draft');
-      let filteredDrafts = allDrafts;
-      if (user?.role === 'Writer' || user?.role === 'writer') {
-        filteredDrafts = allDrafts.filter(a => a.author === user.name);
-      }
-      setDrafts(filteredDrafts);
+      refreshDrafts();
+    }
+  };
+
+  const handleOpenEditor = (id) => {
+    setEditingId(id);
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  };
+
+  const handleCloseEditor = (needsRefresh) => {
+    setEditingId(null);
+    document.body.style.overflow = '';
+    if (needsRefresh) {
+      refreshDrafts();
     }
   };
 
@@ -97,7 +111,11 @@ export default function DraftListPage() {
               <tbody className="font-body-sm text-body-sm text-on-surface">
                 {filteredDrafts.length > 0 ? (
                   filteredDrafts.map((article) => (
-                    <tr key={article.id} className="border-b border-border-muted last:border-b-0 hover:bg-senadee-canvas transition-colors">
+                    <tr 
+                      key={article.id} 
+                      onClick={() => handleOpenEditor(article.id)}
+                      className="border-b border-border-muted last:border-b-0 hover:bg-senadee-canvas transition-colors cursor-pointer"
+                    >
                       <td className="p-4 font-mono text-outline">{article.articleId || 'Menunggu'}</td>
                       <td className="p-4 max-w-xs truncate">
                         <p className="font-bold text-on-surface truncate" title={article.title}>{article.title || 'Untitled Draft'}</p>
@@ -106,10 +124,10 @@ export default function DraftListPage() {
                       <td className="p-4">{formatDate(article.updatedAt || new Date().toISOString())}</td>
                       <td className="p-4 text-right whitespace-nowrap">
                         <div className="flex justify-end gap-2">
-                          <Link to={`/cms/editor?id=${article.id}`} className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-senadee-light hover:text-primary transition-colors cursor-pointer" title="Edit Draft">
+                          <button onClick={(e) => { e.stopPropagation(); handleOpenEditor(article.id); }} className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-senadee-light hover:text-primary transition-colors cursor-pointer" title="Edit Draft">
                             <span className="material-symbols-outlined text-[18px]">edit</span>
-                          </Link>
-                          <button onClick={() => handleDelete(article.id)} className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-error transition-colors cursor-pointer" title="Delete Draft">
+                          </button>
+                          <button onClick={(e) => handleDelete(article.id, e)} className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-error transition-colors cursor-pointer" title="Delete Draft">
                             <span className="material-symbols-outlined text-[18px]">delete</span>
                           </button>
                         </div>
@@ -128,6 +146,13 @@ export default function DraftListPage() {
           </div>
         </div>
       </div>
+
+      {/* FULLSCREEN EDITOR MODAL */}
+      {editingId && (
+        <div className="fixed inset-0 z-[100] bg-surface flex flex-col animate-fade-in">
+          <ArticleEditorPage isModal={true} editId={editingId} onClose={handleCloseEditor} />
+        </div>
+      )}
     </>
   );
 }
