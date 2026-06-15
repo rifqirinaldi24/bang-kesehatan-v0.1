@@ -5,7 +5,8 @@ import CMSHeader from '../../components/cms/CMSHeader';
 import LexicalEditor from '../../components/cms/LexicalEditor';
 import Toast from '../../components/ui/Toast';
 import { getAllArticles, saveArticle } from '../../data/articleStore';
-import { getActiveCategories } from '../../data/categoryStore';
+import { getCategories } from '../../data/categoryStore';
+import { getDoctors } from '../../data/doctorStore';
 import { addLog } from '../../data/logStore';
 import { useAuth } from '../../context/AuthContext';
 
@@ -23,17 +24,27 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
   const [slug, setSlug] = useState('');
   const [isVerified, setIsVerified] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [categories, setCategories] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   
   // AI State
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [initialContent, setInitialContent] = useState('');
+  const [referencesText, setReferencesText] = useState('');
+  const [reviewer, setReviewer] = useState('');
 
   // Right column states
   const [publishMode, setPublishMode] = useState('now'); // 'now' or 'schedule'
   const [publishDate, setPublishDate] = useState('');
 
   const [toastMessage, setToastMessage] = useState('');
+
+  useEffect(() => {
+    setCategories(getCategories().filter(c => c.isActive));
+    setDoctors(getDoctors().filter(d => d.status === 'active'));
+  }, []);
 
   // Load data if editing
   useEffect(() => {
@@ -197,9 +208,19 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
       const response = await result.response;
       const text = response.text();
 
+      let mainContent = text;
+      let refs = '';
+      const refMatch = text.match(/(?:\*\*)?Referensi:(?:\*\*)?\s*([\s\S]*)/i);
+
+      if (refMatch) {
+        mainContent = text.substring(0, refMatch.index).trim();
+        refs = refMatch[1].trim();
+      }
+
       setTitle(topic);
       setSlug(topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
-      setInitialContent(text);
+      setInitialContent(mainContent);
+      setReferencesText(refs);
       setHasGenerated(true);
     } catch (error) {
       console.error("Error generating content:", error);
@@ -348,7 +369,7 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
           {/* 4. Link / Slug */}
           <div className="bg-surface-container-lowest p-4 rounded-xl border border-border-muted flex items-center gap-2 text-outline font-body-md text-body-md">
             <span className="material-symbols-outlined text-[18px]">link</span>
-            <span className="hidden sm:inline">bangkesehatan.com/articles/</span>
+            <span className="hidden sm:inline">senadee-indonesia.id/articles/</span>
             <input
               type="text"
               value={slug}
@@ -364,17 +385,26 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
           {/* 6. Reviewer / Doctor Name */}
           <div className="bg-surface-container-lowest p-5 rounded-xl border border-border-muted flex flex-col gap-2">
             <label className="font-label-md text-label-md font-bold text-on-surface">Ditinjau Oleh (Reviewer)</label>
-            <input
-              type="text"
-              placeholder="e.g. dr. Rifqi Rinaldi"
-              className="w-full bg-surface border border-border-muted rounded-lg font-body-md text-body-md p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-            />
+            <select
+              value={reviewer}
+              onChange={(e) => setReviewer(e.target.value)}
+              className="w-full bg-surface border border-border-muted rounded-lg font-body-md text-body-md p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none appearance-none cursor-pointer"
+            >
+              <option value="">Pilih Dokter Reviewer...</option>
+              {doctors.map(d => (
+                <option key={d.id} value={d.name}>
+                  {d.name} {d.specialty ? `(${d.specialty})` : ''}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* 7. References */}
           <div className="bg-surface-container-lowest p-5 rounded-xl border border-border-muted flex flex-col gap-2">
             <label className="font-label-md text-label-md font-bold text-on-surface">Referensi / Sumber</label>
             <textarea
+              value={referencesText}
+              onChange={(e) => setReferencesText(e.target.value)}
               rows="4"
               placeholder="1. World Health Organization. (2023). Diabetes...&#10;2. Mayo Clinic..."
               className="w-full bg-surface border border-border-muted rounded-lg font-body-sm text-body-sm p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-y"
@@ -460,10 +490,10 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
                 <select 
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full bg-surface border border-border-muted rounded-lg font-body-sm text-body-sm p-2.5 focus:ring-2 focus:ring-primary focus:border-transparent outline-none cursor-pointer"
+                  className="w-full bg-surface border border-border-muted rounded-lg font-body-sm text-body-sm p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none appearance-none cursor-pointer"
                 >
                   <option value="">-- Pilih Kategori --</option>
-                  {getActiveCategories().map(cat => (
+                  {categories.map(cat => (
                     <option key={cat.id} value={cat.key}>{cat.icon} {cat.name}</option>
                   ))}
                 </select>

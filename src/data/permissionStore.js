@@ -36,7 +36,7 @@ export function getAllAvailablePermissions() {
 // Default permission matrix
 const DEFAULT_MATRIX = {
   superuser: ['dashboard', 'editor', 'ai_generator', 'publish', 'analytics', 'manage_users', 'manage_roles', 'settings'],
-  admin:     ['dashboard', 'editor', 'ai_generator', 'publish', 'analytics', 'manage_users'],
+  admin:     ['dashboard', 'editor', 'ai_generator', 'publish', 'analytics', 'manage_users', 'manage_doctors'],
   editor:    ['dashboard', 'editor', 'ai_generator', 'publish'],
   writer:    ['dashboard', 'editor', 'ai_generator'],
 };

@@ -12,6 +12,7 @@ import LoginPage from './pages/cms/LoginPage.jsx';
 import DashboardPage from './pages/cms/DashboardPage.jsx';
 import ArticleEditorPage from './pages/cms/ArticleEditorPage.jsx';
 import UserDirectoryPage from './pages/cms/UserDirectoryPage.jsx';
+import DoctorDirectoryPage from './pages/cms/DoctorDirectoryPage.jsx';
 import RoleManagerPage from './pages/cms/RoleManagerPage.jsx';
 import AccessDeniedPage from './pages/cms/AccessDeniedPage.jsx';
 import ArticleListPage from './pages/cms/ArticleListPage.jsx';
@@ -65,6 +66,13 @@ createRoot(document.getElementById('root')).render(
             <Route element={<ProtectedRoute requiredPermission="manage_users" />}>
               <Route path="/cms" element={<CMSLayout />}>
                 <Route path="users" element={<UserDirectoryPage />} />
+              </Route>
+            </Route>
+
+            {/* CMS Protected Routes — Doctor Directory (butuh manage_doctors) */}
+            <Route element={<ProtectedRoute requiredPermission="manage_doctors" />}>
+              <Route path="/cms" element={<CMSLayout />}>
+                <Route path="doctors" element={<DoctorDirectoryPage />} />
               </Route>
             </Route>
 
