@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import CMSHeader from '../../components/cms/CMSHeader';
@@ -27,6 +27,8 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [categories, setCategories] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [imageUrl, setImageUrl] = useState(null);
+  const fileInputRef = useRef(null);
   
   // AI State
   const [isGenerating, setIsGenerating] = useState(false);
@@ -56,6 +58,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
         setSlug(articleToEdit.slug || '');
         setTopic(articleToEdit.title || '');
         setSelectedCategory(articleToEdit.category || '');
+        setImageUrl(articleToEdit.imageUrl || null);
         setInitialContent(articleToEdit.content ? JSON.stringify(articleToEdit.content) : ''); // Just mock load
       }
     }
@@ -99,6 +102,17 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
     // Jika butuh tutup, biarkan user klik "Kembali/Close"
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handlePublish = () => {
     if (!isVerified) return;
     
@@ -117,6 +131,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       readingTime: 5,
       date: new Date().toISOString().split('T')[0],
       isVerified: true,
+      imageUrl: imageUrl,
       content: initialContent ? [{ heading: 'Published Content', text: 'MOCKED CONTENT' }] : []
     };
     saveArticle(data);
@@ -342,16 +357,37 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
           )}
 
           {/* 2. Image Upload (Compact) */}
-          <div className="bg-surface-container-lowest rounded-xl border border-border-muted border-dashed p-4 flex items-center gap-4 group cursor-pointer hover:bg-surface-container-low transition-colors">
-            <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed transition-colors">
-              <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add_photo_alternate</span>
-            </div>
+          <div 
+            className="bg-surface-container-lowest rounded-xl border border-border-muted border-dashed p-4 flex items-center gap-4 group cursor-pointer hover:bg-surface-container-low transition-colors"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {imageUrl ? (
+              <div className="w-16 h-12 rounded-lg bg-surface-container flex items-center justify-center overflow-hidden">
+                <img src={imageUrl} alt="Featured" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center group-hover:bg-primary-fixed transition-colors">
+                <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add_photo_alternate</span>
+              </div>
+            )}
             <div className="flex-1">
-              <p className="font-label-md text-label-md font-bold text-on-surface">Upload Featured Image</p>
+              <p className="font-label-md text-label-md font-bold text-on-surface">
+                {imageUrl ? 'Featured Image Terpilih' : 'Upload Featured Image'}
+              </p>
               <p className="font-body-sm text-body-sm text-on-surface-variant">Recommended: 1200x675px (16:9)</p>
             </div>
-            <button className="px-4 py-2 bg-surface text-on-surface-variant border border-border-muted rounded-lg font-label-sm text-label-sm group-hover:border-primary transition-colors cursor-pointer">
-              Browse
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*" 
+              onChange={handleImageUpload} 
+            />
+            <button 
+              type="button"
+              className="px-4 py-2 bg-surface text-on-surface-variant border border-border-muted rounded-lg font-label-sm text-label-sm group-hover:border-primary transition-colors cursor-pointer"
+            >
+              {imageUrl ? 'Ganti' : 'Browse'}
             </button>
           </div>
 
