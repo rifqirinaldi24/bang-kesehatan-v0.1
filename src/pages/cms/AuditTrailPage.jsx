@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CMSHeader from '../../components/cms/CMSHeader';
+import { exportToCSV, exportToTXT, exportToExcel } from '../../utils/exportUtils';
 import { MOCK_AUDIT_LOGS } from '../../data/auditLogs';
 
 export default function AuditTrailPage() {
@@ -12,6 +13,17 @@ export default function AuditTrailPage() {
     log.target.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const [showExportMenu, setShowExportMenu] = useState(false);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.export-dropdown-audit')) setShowExportMenu(false);
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const getStatusColor = (status) => {
     switch(status) {
       case 'SUCCESS': return 'text-primary bg-primary-fixed';
@@ -19,6 +31,15 @@ export default function AuditTrailPage() {
       default: return 'text-on-surface-variant bg-surface-container';
     }
   };
+
+  const exportColumns = [
+    { key: 'id', label: 'ID Log' },
+    { key: 'timestamp', label: 'Waktu' },
+    { key: 'user', label: 'Aktor' },
+    { key: 'action', label: 'Aktivitas' },
+    { key: 'ip', label: 'IP Address' },
+    { key: 'status', label: 'Status' }
+  ];
 
   return (
     <>
@@ -46,10 +67,24 @@ export default function AuditTrailPage() {
                 className="w-full pl-10 pr-4 py-2 bg-surface border border-border-muted rounded-lg font-body-sm text-body-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
               />
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-surface border border-border-muted rounded-lg font-label-sm text-label-sm text-on-surface hover:bg-surface-container-low transition-colors cursor-pointer">
-              <span className="material-symbols-outlined text-[18px]">download</span>
-              Export CSV
-            </button>
+            
+            <div className="relative export-dropdown-audit">
+              <button 
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-surface border border-border-muted hover:bg-surface-container-low rounded-lg font-label-sm text-label-sm font-semibold transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">download</span>
+                Export ⬇️
+              </button>
+              
+              {showExportMenu && (
+                <div className="absolute top-full right-0 mt-1 w-40 bg-surface rounded-lg shadow-lg border border-border-muted overflow-hidden z-10 animate-fade-in">
+                  <button onClick={() => { exportToCSV('audit_trail', filteredLogs, exportColumns); setShowExportMenu(false); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low text-sm cursor-pointer">Download CSV</button>
+                  <button onClick={() => { exportToTXT('audit_trail', filteredLogs, exportColumns); setShowExportMenu(false); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low text-sm cursor-pointer border-t border-border-muted">Download TXT</button>
+                  <button onClick={() => { exportToExcel('audit_trail', filteredLogs, exportColumns); setShowExportMenu(false); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low text-sm cursor-pointer border-t border-border-muted">Download Excel</button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Table */}

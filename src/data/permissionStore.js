@@ -2,19 +2,36 @@
 // permissionStore.js — Permission Matrix (Parameterized per Role)
 // ============================================================
 
+import { getMenuOrder } from './menuOrderStore';
+
 const STORAGE_KEY = 'bk_permissions';
 
-// Daftar semua permission yang tersedia di sistem
-export const ALL_PERMISSIONS = [
-  { key: 'dashboard',     label: 'Dashboard',        icon: 'dashboard',      description: 'Melihat ringkasan dan statistik' },
-  { key: 'editor',        label: 'Content Manager',  icon: 'edit_square',    description: 'Membuat dan mengedit artikel' },
+// Daftar permission dasar (selain menu)
+const BASE_PERMISSIONS = [
   { key: 'ai_generator',  label: 'AI Generator',     icon: 'auto_awesome',   description: 'Menggunakan AI untuk generate artikel' },
   { key: 'publish',       label: 'Publish Artikel',  icon: 'publish',        description: 'Mempublikasikan artikel ke website' },
-  { key: 'analytics',     label: 'Analytics',        icon: 'bar_chart',      description: 'Melihat data analytics dan traffic' },
-  { key: 'manage_users',  label: 'User Directory',   icon: 'group',          description: 'Mengelola daftar user' },
-  { key: 'manage_roles',  label: 'Role Manager',     icon: 'admin_panel_settings', description: 'Mengonfigurasi permission per role' },
-  { key: 'settings',      label: 'System Settings',  icon: 'settings',       description: 'Pengaturan sistem' },
+  { key: 'analytics',     label: 'Analytics',        icon: 'bar_chart',      description: 'Melihat data analytics dan traffic' }
 ];
+
+export function getAllAvailablePermissions() {
+  const menus = getMenuOrder();
+  
+  // Ambil permission dari menu
+  const menuPerms = menus
+    .filter(m => m.permission)
+    .map(m => ({
+      key: m.permission,
+      label: `Menu: ${m.name}`,
+      icon: m.icon,
+      description: `Akses menu ${m.name}`
+    }));
+
+  // Hilangkan duplikat key dari menu (karena beberapa menu bisa pakai permission sama)
+  const uniqueMenuPerms = menuPerms.filter((v, i, a) => a.findIndex(t => (t.key === v.key)) === i);
+
+  // Gabungkan dengan base permissions
+  return [...BASE_PERMISSIONS, ...uniqueMenuPerms];
+}
 
 // Default permission matrix
 const DEFAULT_MATRIX = {
@@ -33,7 +50,7 @@ function initializePermissions() {
   }
   const matrix = JSON.parse(stored);
   // Pastikan superuser selalu punya semua permission
-  matrix.superuser = ALL_PERMISSIONS.map(p => p.key);
+  matrix.superuser = getAllAvailablePermissions().map(p => p.key);
   return matrix;
 }
 

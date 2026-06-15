@@ -1,13 +1,31 @@
 import { useState, useEffect } from 'react';
 import CMSHeader from '../../components/cms/CMSHeader';
+import Toast from '../../components/ui/Toast';
 import { getAllArticles, deleteArticle } from '../../data/articleStore';
 import { formatDate } from '../../data/articles';
+import { exportToCSV, exportToTXT, exportToExcel } from '../../utils/exportUtils';
 
 export default function ArticleListPage() {
   const [articles, setArticles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewingArticle, setViewingArticle] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [showExportMenu, setShowExportMenu] = useState(false);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.export-dropdown-article')) setShowExportMenu(false);
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const showSuccess = (msg) => {
+    setSuccessMsg(msg);
+    setTimeout(() => setSuccessMsg(''), 3000);
+  };
 
   const refreshArticles = () => {
     const all = getAllArticles().filter(a => a.status === 'published');
@@ -56,6 +74,7 @@ export default function ArticleListPage() {
       setDeleteConfirm(null);
       setViewingArticle(null);
       document.body.style.overflow = '';
+      showSuccess('Data Berhasil Dihapus');
     }
   };
 
@@ -79,9 +98,19 @@ export default function ArticleListPage() {
     article.author.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const exportColumns = [
+    { key: 'articleId', label: 'ID Artikel' },
+    { key: 'title', label: 'Judul Artikel' },
+    { key: 'author', label: 'Penulis' },
+    { key: 'category', label: 'Kategori' },
+    { key: 'readingTime', label: 'Waktu Baca', getValue: row => `${row.readingTime} Menit` },
+    { key: 'date', label: 'Tanggal Publish' }
+  ];
+
   return (
     <>
-      <CMSHeader title="Semua Artikel" subtitle="Article History (Read Only)" />
+      <Toast message={successMsg} onClose={() => setSuccessMsg('')} />
+      <CMSHeader title="Semua Artikel" subtitle="Manage your published content" />
       
       <div className="p-margin-mobile md:p-gutter max-w-container-max mx-auto w-full">
         <div className="bg-surface-container-lowest rounded-xl border border-border-muted shadow-sm overflow-hidden">
@@ -97,6 +126,24 @@ export default function ArticleListPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-surface border border-border-muted rounded-lg font-body-sm text-body-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
               />
+            </div>
+
+            <div className="relative export-dropdown-article">
+              <button 
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-surface border border-border-muted hover:bg-surface-container-low rounded-lg font-label-sm text-label-sm font-semibold transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">download</span>
+                Export ⬇️
+              </button>
+              
+              {showExportMenu && (
+                <div className="absolute top-full right-0 mt-1 w-40 bg-surface rounded-lg shadow-lg border border-border-muted overflow-hidden z-10 animate-fade-in">
+                  <button onClick={() => { exportToCSV('semua_artikel', filteredArticles, exportColumns); setShowExportMenu(false); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low text-sm cursor-pointer">Download CSV</button>
+                  <button onClick={() => { exportToTXT('semua_artikel', filteredArticles, exportColumns); setShowExportMenu(false); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low text-sm cursor-pointer border-t border-border-muted">Download TXT</button>
+                  <button onClick={() => { exportToExcel('semua_artikel', filteredArticles, exportColumns); setShowExportMenu(false); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low text-sm cursor-pointer border-t border-border-muted">Download Excel</button>
+                </div>
+              )}
             </div>
           </div>
 

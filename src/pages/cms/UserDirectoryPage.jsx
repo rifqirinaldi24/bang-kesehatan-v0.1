@@ -23,6 +23,21 @@ export default function UserDirectoryPage() {
   const [successMsg, setSuccessMsg] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
+  // ESC Keyboard Listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (deleteConfirm) {
+          setDeleteConfirm(null);
+        } else if (showModal) {
+          setShowModal(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [deleteConfirm, showModal]);
+
   const refreshUsers = () => setUsers(getUsers());
 
   // Filtered users
@@ -108,7 +123,7 @@ export default function UserDirectoryPage() {
       deleteUser(id);
       refreshUsers();
       setDeleteConfirm(null);
-      showSuccess('User berhasil dihapus.');
+      showSuccess('Data Berhasil Dihapus');
     } catch (err) {
       alert(err.message);
       setDeleteConfirm(null);

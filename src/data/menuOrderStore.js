@@ -19,7 +19,6 @@ const DEFAULT_MENU_ORDER = [
   { id: 'menu-order',   name: 'Urutan Menu',        icon: 'reorder',           path: '/cms/menu-order',  permission: 'settings', section: 'bottom', visible: true, order: 2 },
   { id: 'parameters',   name: 'Data Parameter',     icon: 'tune',              path: '/cms/parameters',  permission: 'settings', section: 'bottom', visible: true, order: 3 },
   { id: 'roles',        name: 'Role Manager',       icon: 'admin_panel_settings', path: '/cms/roles',   permission: 'manage_roles', section: 'bottom', visible: true, order: 4 },
-  { id: 'status',       name: 'System Status',      icon: 'check_circle',      path: '/cms/status',    permission: null,           section: 'bottom', visible: true, order: 5 },
 ];
 
 function initialize() {
@@ -41,7 +40,14 @@ function initialize() {
   if (hasNew) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
   }
-  return parsed;
+  
+  // Migration: remove 'status' menu
+  const finalParsed = parsed.filter(m => m.id !== 'status');
+  if (finalParsed.length !== parsed.length) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(finalParsed));
+  }
+
+  return finalParsed;
 }
 
 function save(menuOrder) {
@@ -108,6 +114,13 @@ export function toggleMenuVisibility(id) {
 export function resetMenuOrder() {
   save(DEFAULT_MENU_ORDER);
   return DEFAULT_MENU_ORDER.map(m => ({ ...m }));
+}
+
+// Helper: dapatkan semua permission unik yang terdaftar di menu
+export function getAllPermissions() {
+  const menus = initialize();
+  const perms = menus.map(m => m.permission).filter(p => p !== null && p !== undefined && p !== '');
+  return [...new Set(perms)];
 }
 
 export { DEFAULT_MENU_ORDER };

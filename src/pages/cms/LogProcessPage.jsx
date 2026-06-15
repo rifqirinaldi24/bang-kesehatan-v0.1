@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import CMSHeader from '../../components/cms/CMSHeader';
 import { getLogs, clearLogs } from '../../data/logStore';
+import { exportToCSV, exportToTXT, exportToExcel } from '../../utils/exportUtils';
 import { formatDate } from '../../data/articles'; // You can reuse formatDate or write a precise one
 
 function formatDateTime(isoString) {
@@ -14,9 +15,19 @@ function formatDateTime(isoString) {
 export default function LogProcessPage() {
   const [logs, setLogs] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   useEffect(() => {
     setLogs(getLogs());
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.export-dropdown')) setShowExportMenu(false);
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   const handleClearLogs = () => {
@@ -32,6 +43,16 @@ export default function LogProcessPage() {
     log.actor.toLowerCase().includes(searchTerm.toLowerCase()) ||
     log.action.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const exportColumns = [
+    { key: 'id', label: 'ID Log' },
+    { key: 'timestamp', label: 'Waktu Proses', getValue: row => formatDateTime(row.timestamp) },
+    { key: 'actor', label: 'Aktor' },
+    { key: 'action', label: 'Proses' },
+    { key: 'articleTitle', label: 'Artikel' },
+    { key: 'status', label: 'Status' },
+    { key: 'reason', label: 'Alasan (Gagal)' }
+  ];
 
   return (
     <>
@@ -52,13 +73,32 @@ export default function LogProcessPage() {
                 className="w-full pl-10 pr-4 py-2 bg-surface border border-border-muted rounded-lg font-body-sm text-body-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
               />
             </div>
-            <button 
-              onClick={handleClearLogs}
-              className="inline-flex items-center gap-2 px-4 py-2 text-error bg-error-container hover:bg-error/20 rounded-lg font-label-sm text-label-sm font-semibold transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
-              Clear Logs
-            </button>
+            
+            <div className="flex gap-2 relative export-dropdown">
+              <button 
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-surface border border-border-muted hover:bg-surface-container-low rounded-lg font-label-sm text-label-sm font-semibold transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">download</span>
+                Export ⬇️
+              </button>
+              
+              {showExportMenu && (
+                <div className="absolute top-full right-0 mt-1 w-40 bg-surface rounded-lg shadow-lg border border-border-muted overflow-hidden z-10 animate-fade-in">
+                  <button onClick={() => { exportToCSV('log_process', filteredLogs, exportColumns); setShowExportMenu(false); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low text-sm cursor-pointer">Download CSV</button>
+                  <button onClick={() => { exportToTXT('log_process', filteredLogs, exportColumns); setShowExportMenu(false); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low text-sm cursor-pointer border-t border-border-muted">Download TXT</button>
+                  <button onClick={() => { exportToExcel('log_process', filteredLogs, exportColumns); setShowExportMenu(false); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low text-sm cursor-pointer border-t border-border-muted">Download Excel</button>
+                </div>
+              )}
+
+              <button 
+                onClick={handleClearLogs}
+                className="inline-flex items-center gap-2 px-4 py-2 text-error bg-error-container hover:bg-error/20 rounded-lg font-label-sm text-label-sm font-semibold transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
+                Clear Logs
+              </button>
+            </div>
           </div>
 
           {/* Table */}

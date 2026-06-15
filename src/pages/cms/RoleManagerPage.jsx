@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ALL_PERMISSIONS, getPermissionMatrix, updateRolePermissions, resetToDefault } from '../../data/permissionStore';
+import { getAllAvailablePermissions, getPermissionMatrix, updateRolePermissions, resetToDefault } from '../../data/permissionStore';
 import { useAuth } from '../../context/AuthContext';
 import CMSHeader from '../../components/cms/CMSHeader';
 
@@ -210,7 +210,7 @@ export default function RoleManagerPage() {
                 </span>
               </div>
               <p className="font-label-sm text-label-sm text-on-surface-variant">
-                {countActive(role.key)} / {ALL_PERMISSIONS.length} permission aktif
+                {countActive(role.key)} / {allPermissions.length} permission aktif
               </p>
             </div>
           ))}
@@ -251,7 +251,7 @@ export default function RoleManagerPage() {
           </div>
 
           {/* Permission rows */}
-          {ALL_PERMISSIONS.map((perm, index) => (
+          {allPermissions.map((perm, index) => (
             <div
               key={perm.key}
               className="grid items-center"
@@ -260,7 +260,7 @@ export default function RoleManagerPage() {
                 padding: '14px 20px',
                 gap: 8,
                 backgroundColor: index % 2 === 0 ? 'transparent' : 'var(--color-surface-container-low)',
-                borderBottom: index < ALL_PERMISSIONS.length - 1 ? '1px solid var(--color-border-muted)' : 'none',
+                borderBottom: index < allPermissions.length - 1 ? '1px solid var(--color-border-muted)' : 'none',
                 transition: 'background-color 0.15s',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-surface-container)'; }}

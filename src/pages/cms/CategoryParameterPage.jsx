@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { getCategories, addCategory, updateCategory, deleteCategory, toggleCategoryStatus, resetCategories } from '../../data/categoryStore';
 
 const INITIAL_FORM = { name: '', key: '', icon: '📄', color: '#6b7280', isActive: true };
@@ -12,6 +12,21 @@ export default function CategoryParameterPage() {
   const [formError, setFormError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  // ESC Keyboard Listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (deleteConfirm) {
+          setDeleteConfirm(null);
+        } else if (showModal) {
+          setShowModal(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [deleteConfirm, showModal]);
 
   const refresh = () => setCategories(getCategories());
 
@@ -65,10 +80,10 @@ export default function CategoryParameterPage() {
 
   const handleDelete = (id) => {
     try {
-      deleteCategory(id);
+      deleteCategory(deleteConfirm.id);
       refresh();
       setDeleteConfirm(null);
-      showSuccess('Kategori berhasil dihapus.');
+      showSuccess('Data Berhasil Dihapus');
     } catch (err) {
       alert(err.message);
       setDeleteConfirm(null);

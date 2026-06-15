@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import CMSHeader from '../../components/cms/CMSHeader';
+import Toast from '../../components/ui/Toast';
 import { getAllArticles, deleteArticle } from '../../data/articleStore';
 import { formatDate } from '../../data/articles';
 import { useAuth } from '../../context/AuthContext';
@@ -11,7 +12,13 @@ export default function DraftListPage() {
   const [editingId, setEditingId] = useState(null);
   const [viewingArticle, setViewingArticle] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [successMsg, setSuccessMsg] = useState('');
   const { user } = useAuth();
+
+  const showSuccess = (msg) => {
+    setSuccessMsg(msg);
+    setTimeout(() => setSuccessMsg(''), 3000);
+  };
 
   const refreshDrafts = () => {
     // Only show draft articles
@@ -83,6 +90,7 @@ export default function DraftListPage() {
       setDeleteConfirm(null);
       setViewingArticle(null);
       document.body.style.overflow = '';
+      showSuccess('Data Berhasil Dihapus');
     }
   };
 
@@ -107,6 +115,7 @@ export default function DraftListPage() {
 
   return (
     <>
+      <Toast message={successMsg} onClose={() => setSuccessMsg('')} />
       <CMSHeader title="Draft Artikel" subtitle="Manage your drafted content" />
       
       <div className="p-margin-mobile md:p-gutter max-w-container-max mx-auto w-full">
