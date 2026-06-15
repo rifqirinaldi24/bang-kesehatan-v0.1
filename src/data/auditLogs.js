@@ -60,3 +60,38 @@ export const MOCK_AUDIT_LOGS = [
     ipAddress: '192.168.1.200'
   }
 ];
+
+const STORAGE_KEY = 'senadee_audit_logs';
+
+function generateLogId() {
+  return 'LOG-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+}
+
+function initializeLogs() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (!stored) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_AUDIT_LOGS));
+    return [...MOCK_AUDIT_LOGS];
+  }
+  return JSON.parse(stored);
+}
+
+export function getAuditLogs() {
+  return initializeLogs().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+}
+
+export function addAuditLog({ user, role = 'User', action, target, status = 'SUCCESS', ipAddress = '127.0.0.1' }) {
+  const logs = initializeLogs();
+  const newLog = {
+    id: generateLogId(),
+    timestamp: new Date().toISOString(),
+    user: user || 'Unknown',
+    role,
+    action,
+    target,
+    status,
+    ipAddress
+  };
+  logs.unshift(newLog);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+}

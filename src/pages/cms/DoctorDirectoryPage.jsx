@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { getDoctors, addDoctor, updateDoctor, deleteDoctor, toggleDoctorStatus } from '../../data/doctorStore';
-import { addLog } from '../../data/logStore';
+import { addAuditLog } from '../../data/auditLogs';
 import { useAuth } from '../../context/AuthContext';
 
 const INITIAL_FORM = { name: '', specialty: '', status: 'active' };
@@ -65,11 +65,11 @@ export default function DoctorDirectoryPage() {
     if (editingDoctor) {
       updateDoctor({ ...editingDoctor, name: form.name, specialty: form.specialty, status: form.status });
       showSuccess('Dokter berhasil diperbarui!');
-      addLog({ action: 'Edit Doctor', articleTitle: `Doctor: ${form.name}`, actor: user?.name, status: 'Success' });
+      addAuditLog({ action: 'UPDATE_DOCTOR', target: `Doctor: ${form.name}`, user: user?.name, role: user?.role, status: 'SUCCESS' });
     } else {
       addDoctor({ name: form.name, specialty: form.specialty, status: form.status });
       showSuccess('Dokter berhasil ditambahkan!');
-      addLog({ action: 'Add Doctor', articleTitle: `Doctor: ${form.name}`, actor: user?.name, status: 'Success' });
+      addAuditLog({ action: 'ADD_DOCTOR', target: `Doctor: ${form.name}`, user: user?.name, role: user?.role, status: 'SUCCESS' });
     }
     setShowModal(false);
     refreshDoctors();
@@ -79,7 +79,7 @@ export default function DoctorDirectoryPage() {
     toggleDoctorStatus(id);
     const doctor = doctors.find(d => d.id === id);
     if (doctor) {
-      addLog({ action: 'Toggle Doctor Status', articleTitle: `Doctor: ${doctor.name}`, actor: user?.name, status: 'Success' });
+      addAuditLog({ action: 'TOGGLE_DOCTOR_STATUS', target: `Doctor: ${doctor.name}`, user: user?.name, role: user?.role, status: 'SUCCESS' });
     }
     refreshDoctors();
   };
@@ -92,7 +92,7 @@ export default function DoctorDirectoryPage() {
     if (deleteConfirm) {
       deleteDoctor(deleteConfirm.id);
       showSuccess('Dokter berhasil dihapus!');
-      addLog({ action: 'Delete Doctor', articleTitle: `Doctor: ${deleteConfirm.name}`, actor: user?.name, status: 'Success' });
+      addAuditLog({ action: 'DELETE_DOCTOR', target: `Doctor: ${deleteConfirm.name}`, user: user?.name, role: user?.role, status: 'SUCCESS' });
       setDeleteConfirm(null);
       refreshDoctors();
     }

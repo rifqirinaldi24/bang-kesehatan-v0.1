@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import CMSHeader from '../../components/cms/CMSHeader';
 import { exportToCSV, exportToTXT, exportToExcel } from '../../utils/exportUtils';
-import { MOCK_AUDIT_LOGS } from '../../data/auditLogs';
+import { getAuditLogs } from '../../data/auditLogs';
 
 export default function AuditTrailPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [logs] = useState(MOCK_AUDIT_LOGS);
+  const [logs] = useState(() => getAuditLogs());
 
   const filteredLogs = logs.filter(log => 
     log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
