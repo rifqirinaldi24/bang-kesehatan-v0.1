@@ -117,7 +117,7 @@ export default function CategoryParameterPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="font-headline-md text-headline-md font-bold text-on-surface">Parameter Kategori</h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">Kelola kategori/pilar artikel Bang Kesehatan</p>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-1">Kelola kategori/pilar artikel Senadee</p>
         </div>
         <div className="flex gap-2">
           <button onClick={handleReset} className="inline-flex items-center gap-2 px-4 py-2.5 border border-border-muted text-on-surface-variant rounded-xl font-label-md text-label-md hover:bg-surface-container-low transition-colors cursor-pointer">

@@ -102,6 +102,7 @@ function Toast({ message, visible, onClose }) {
 // ════════════════════════════════════════════
 export default function RoleManagerPage() {
   const { refreshPermissions } = useAuth();
+  const allPermissions = getAllAvailablePermissions();
 
   // Local copy of the full permission matrix for editing
   const [matrix, setMatrix] = useState(() => getPermissionMatrix());

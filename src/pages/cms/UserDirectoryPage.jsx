@@ -166,7 +166,7 @@ export default function UserDirectoryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="font-headline-md text-headline-md font-bold text-on-surface">User Directory</h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">Kelola semua pengguna CMS Bang Kesehatan</p>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-1">Kelola semua pengguna CMS Senadee</p>
         </div>
         <button onClick={handleAddNew} className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-xl font-label-md text-label-md font-semibold hover:opacity-90 transition-opacity cursor-pointer">
           <span className="material-symbols-outlined text-[20px]">person_add</span>

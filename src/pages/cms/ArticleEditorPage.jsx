@@ -163,7 +163,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
 
       const wordCountRule = articleType === 'general' ? 'Maksimal 500 - 600 kata' : 'Maksimal 350 - 400 kata';
 
-      const prompt = `Anda adalah penulis medis/kesehatan Senior untuk portal "Bang Kesehatan".
+      const prompt = `Anda adalah penulis medis/kesehatan Senior untuk portal "Senadee".
 Tugas Anda adalah menulis artikel kesehatan yang berbobot, akurat, empatik, dan mudah dipahami.
 Sangat Penting: Lokalisasi untuk pembaca di Indonesia (sesuaikan gaya hidup, iklim, makanan lokal, dan kebiasaan di Indonesia).
 
