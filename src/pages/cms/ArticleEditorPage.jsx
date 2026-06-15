@@ -156,7 +156,14 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
           threshold: HarmBlockThreshold.BLOCK_NONE,
         },
       ];
-      const model = genAI.getGenerativeModel({ model: "gemini-flash-latest", safetySettings });
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash-8b", 
+        safetySettings,
+        generationConfig: {
+          maxOutputTokens: 1500,
+          temperature: 0.7,
+        }
+      });
 
       const wordCountRule = articleType === 'general' ? 'Maksimal 500 - 600 kata' : 'Maksimal 350 - 400 kata';
 
