@@ -157,7 +157,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
         },
       ];
       const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash", 
+        model: "gemini-flash-latest", 
         safetySettings,
         generationConfig: {
           maxOutputTokens: 800,
