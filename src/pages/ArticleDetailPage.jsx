@@ -35,15 +35,15 @@ export default function ArticleDetailPage() {
       }
 
       // Handle Lists
-      if (block.startsWith('- ') || block.startsWith('* ') || /^\\d+\\.\\s/.test(block)) {
-        const isOrdered = /^\\d+\\.\\s/.test(block);
+      if (block.startsWith('- ') || block.startsWith('* ') || /^\d+\.\s/.test(block)) {
+        const isOrdered = /^\d+\.\s/.test(block);
         const listItems = block.split('\n').filter(line => line.trim());
         const ListTag = isOrdered ? 'ol' : 'ul';
         const listClass = isOrdered ? 'list-decimal' : 'list-disc';
         return (
-          <ListTag key={idx} className={\`\${listClass} pl-6 mb-6 space-y-2\`}>
+          <ListTag key={idx} className={listClass + " pl-6 mb-6 space-y-2"}>
             {listItems.map((li, liIdx) => (
-              <li key={liIdx}>{renderInlineElements(li.replace(/^(?:[-*]|\\d+\\.)\\s+/, ''))}</li>
+              <li key={liIdx}>{renderInlineElements(li.replace(/^(?:[-*]|\d+\.)\s+/, ''))}</li>
             ))}
           </ListTag>
         );
@@ -56,7 +56,7 @@ export default function ArticleDetailPage() {
 
   const renderInlineElements = (text) => {
     // Basic inline parser for bold and italic
-    const parts = text.split(/(\\*{1,2}.*?\\*{1,2}|<u\\b[^>]*>.*?<\\/u>)/g);
+    const parts = text.split(/(\*{1,2}.*?\*{1,2}|<u\b[^>]*>.*?<\/u>)/g);
     return parts.map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return <strong key={i} className="font-bold text-on-surface">{part.slice(2, -2)}</strong>;
@@ -284,3 +284,4 @@ export default function ArticleDetailPage() {
     </>
   );
 }
+
