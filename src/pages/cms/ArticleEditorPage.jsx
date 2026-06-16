@@ -299,18 +299,19 @@ ATURAN POINT OF VIEW (POV) & SAPAAN:
 
 WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
 1. PANJANG ARTIKEL: ${wordCountRule}.
-2. INTRODUCTION: Pada 100 kata pertama, Anda WAJIB memberikan jawaban singkat (40-60 kata) yang langsung menjawab keyword utama tanpa basa-basi. Intro ini berfungsi sebagai featured snippet Google.
-3. PARAGRAF PENDEK: Tiap paragraf maksimal 2-3 kalimat (agar saat dibaca di mobile tidak lebih dari 3-4 baris). Gunakan Bullet Points jika menjelaskan langkah/ciri-ciri.
-4. PENUTUP: Paragraf terakhir WAJIB berisi ringkasan singkat artikel dan bagian 'Kapan Perlu ke Dokter'. Sebutkan dengan jelas tanda-tanda bahaya/kondisi yang memerlukan evaluasi medis lanjutan, disertai ajakan konsultasi (Contoh: "Segera periksakan diri ke dokter jika Anda mengalami...").
-5. TANDA BACA & BAHASA: DILARANG KERAS menggunakan tanda dash panjang (—) di dalam kalimat. Gunakan koma atau titik dua. Pastikan semua istilah bahasa Inggris dicetak miring (*italic*).
-6. ANTI KEYWORD STUFFING: DILARANG mengulang keyword utama secara kaku dan berlebihan. Gunakan variasi kata yang natural.
-7. INTERNAL LINK MARKING: Setiap artikel hanya boleh menjawab 1 intent utama. Jika ada sebutan penyakit/topik lanjutan, jangan dijelaskan panjang lebar. Tandai frasa tersebut menggunakan tag HTML <u>...</u> sebagai rekomendasi internal link (Contoh: "Diabetes dapat memicu <u>komplikasi jantung</u>.").
-8. ANTI-HALUSINASI MEDIS: DILARANG KERAS mengarang statistik, hasil penelitian, kutipan dokter, atau referensi. Gunakan deskripsi kualitatif (contoh: "sebagian", "sering ditemukan") jika tidak ada data angka spesifik. Tulis "belum ada cukup bukti" jika bukti ilmiah terbatas.
-9. DISCLAIMER HERBAL: Jika topik membahas pengobatan herbal/alami, Anda WAJIB mencantumkan disclaimer ini persis: "Penggunaan herbal sebaiknya dikonsultasikan dengan dokter, terutama bila Anda memiliki penyakit kronis atau sedang mengonsumsi obat tertentu."
+2. DILARANG MEMBUAT JUDUL ARTIKEL DI DALAM TEKS: JANGAN menggunakan H1 (#) atau menulis judul di baris pertama. Tulisan harus langsung dimulai dengan paragraf Introduction.
+3. INTRODUCTION: Pada 100 kata pertama, Anda WAJIB memberikan jawaban singkat (40-60 kata) yang langsung menjawab keyword utama tanpa basa-basi. Intro ini berfungsi sebagai featured snippet Google.
+4. PARAGRAF PENDEK: Tiap paragraf maksimal 2-3 kalimat (agar saat dibaca di mobile tidak lebih dari 3-4 baris). Gunakan Bullet Points jika menjelaskan langkah/ciri-ciri.
+5. PENUTUP: Paragraf terakhir WAJIB berisi ringkasan singkat artikel dan bagian 'Kapan Perlu ke Dokter'. Sebutkan dengan jelas tanda-tanda bahaya/kondisi yang memerlukan evaluasi medis lanjutan, disertai ajakan konsultasi (Contoh: "Segera periksakan diri ke dokter jika Anda mengalami...").
+6. TANDA BACA & BAHASA: DILARANG KERAS menggunakan tanda dash panjang (—) dan tiga bintang (***) di dalam kalimat. Gunakan koma atau titik dua. Pastikan semua istilah bahasa Inggris dicetak miring (*italic*).
+7. ANTI KEYWORD STUFFING: DILARANG mengulang keyword utama secara kaku dan berlebihan. Gunakan variasi kata yang natural.
+8. INTERNAL LINK MARKING: Setiap artikel hanya boleh menjawab 1 intent utama. Jika ada sebutan penyakit/topik lanjutan, jangan dijelaskan panjang lebar. Tandai frasa tersebut menggunakan tag HTML <u>...</u> sebagai rekomendasi internal link (Contoh: "Diabetes dapat memicu <u>komplikasi jantung</u>.").
+9. ANTI-HALUSINASI MEDIS: DILARANG KERAS mengarang statistik, hasil penelitian, kutipan dokter, atau referensi. Gunakan deskripsi kualitatif (contoh: "sebagian", "sering ditemukan") jika tidak ada data angka spesifik. Tulis "belum ada cukup bukti" jika bukti ilmiah terbatas.
+10. DISCLAIMER HERBAL: Jika topik membahas pengobatan herbal/alami, Anda WAJIB mencantumkan disclaimer ini persis: "Penggunaan herbal sebaiknya dikonsultasikan dengan dokter, terutama bila Anda memiliki penyakit kronis atau sedang mengonsumsi obat tertentu."
 
 STRUKTUR OUTPUT (PENTING!):
 Output Anda harus HANYA berisi Markdown murni tanpa basa-basi pembuka/penutup, terbagi dalam 3 bagian berurutan:
-1. [KONTEN ARTIKEL]: Isi artikel utama. Gunakan H2 (##) untuk subjudul. JANGAN gunakan H1 (#).
+1. [KONTEN ARTIKEL]: Isi artikel utama. Sekali lagi, langsung mulai dengan paragraf pembuka tanpa judul. Gunakan H2 (##) HANYA untuk subjudul.
 2. [FAQ]: Di akhir artikel, buat judul **FAQ**. Buat ${faqCountRule} yang relevan (tidak mengulang isi artikel). Formatnya:
    Q: [Pertanyaan]
    A: [Jawaban 30-80 kata]
@@ -336,7 +337,7 @@ Output Anda harus HANYA berisi Markdown murni tanpa basa-basi pembuka/penutup, t
         mainContent = mainContent.substring(0, refMatch.index).trim();
       }
 
-      const faqMatch = mainContent.match(/(?:\*\*)?FAQ(?:\*\*)?\s*\n([\s\S]*)/i);
+      const faqMatch = mainContent.match(/(?:#+\s*)?(?:\*\*)?FAQ(?:\*\*)?\s*\n([\s\S]*)/i);
       if (faqMatch) {
         rawFaq = faqMatch[1].trim();
         mainContent = mainContent.substring(0, faqMatch.index).trim();

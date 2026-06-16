@@ -9,33 +9,77 @@ import { formatReadingTime } from '../utils/readingTime';
 export default function ArticleDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
 
   const article = useMemo(() => getArticleBySlug(slug), [slug]);
   const pillar = useMemo(() => article ? getPillarById(article.category) : null, [article]);
 
-  // Scroll spy for table of contents
-  useEffect(() => {
-    if (!article) return;
+  // Custom Markdown parser function
+  const renderMarkdown = (text) => {
+    if (!text) return null;
+    const blocks = text.split('\n\n');
+    return blocks.map((block, idx) => {
+      block = block.trim();
+      if (!block) return null;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '-80px 0px -70% 0px' }
-    );
+      // Handle Headings
+      if (block.startsWith('## ')) {
+        return <h2 key={idx} className="text-xl sm:text-2xl font-heading font-bold text-on-surface mt-10 mb-4 flex items-start gap-3">
+          {renderInlineElements(block.substring(3))}
+        </h2>;
+      }
+      if (block.startsWith('### ')) {
+        return <h3 key={idx} className="text-lg sm:text-xl font-heading font-bold text-on-surface mt-8 mb-3">
+          {renderInlineElements(block.substring(4))}
+        </h3>;
+      }
 
-    article.content.forEach((_, index) => {
-      const el = document.getElementById(`section-${index}`);
-      if (el) observer.observe(el);
+      // Handle Lists
+      if (block.startsWith('- ') || block.startsWith('* ') || /^\\d+\\.\\s/.test(block)) {
+        const isOrdered = /^\\d+\\.\\s/.test(block);
+        const listItems = block.split('\n').filter(line => line.trim());
+        const ListTag = isOrdered ? 'ol' : 'ul';
+        const listClass = isOrdered ? 'list-decimal' : 'list-disc';
+        return (
+          <ListTag key={idx} className={\`\${listClass} pl-6 mb-6 space-y-2\`}>
+            {listItems.map((li, liIdx) => (
+              <li key={liIdx}>{renderInlineElements(li.replace(/^(?:[-*]|\\d+\\.)\\s+/, ''))}</li>
+            ))}
+          </ListTag>
+        );
+      }
+
+      // Default Paragraph
+      return <p key={idx} className="mb-6">{renderInlineElements(block)}</p>;
     });
+  };
 
-    return () => observer.disconnect();
+  const renderInlineElements = (text) => {
+    // Basic inline parser for bold and italic
+    const parts = text.split(/(\\*{1,2}.*?\\*{1,2}|<u\\b[^>]*>.*?<\\/u>)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} className="font-bold text-on-surface">{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith('*') && part.endsWith('*')) {
+        return <em key={i} className="italic">{part.slice(1, -1)}</em>;
+      }
+      if (part.startsWith('<u>') && part.endsWith('</u>')) {
+        // Render <u> elements normally
+        return <u key={i} className="underline underline-offset-2 text-primary">{part.slice(3, -4)}</u>;
+      }
+      return part;
+    });
+  };
+
+  // Combine sections back to a full markdown string
+  const fullMarkdown = useMemo(() => {
+    if (!article || !article.content) return '';
+    return article.content.map(section => {
+      // Don't prepend "Pendahuluan" as a heading if it was implicitly added
+      const heading = (section.heading && section.heading !== 'Pendahuluan') ? `## ${section.heading}\n` : '';
+      return heading + section.text;
+    }).join('\n\n');
   }, [article]);
 
   // 404 handler
@@ -63,71 +107,75 @@ export default function ArticleDetailPage() {
     );
   }
 
-  const PILLAR_TAG_COLORS = {
-    'family-health': 'bg-pink-100 text-pink-700',
-    'nutrition': 'bg-amber-100 text-amber-700',
-    'fitness': 'bg-blue-100 text-blue-700',
-    'preventive-health': 'bg-violet-100 text-violet-700',
-  };
-
   return (
     <>
       <SEOHead
         title={article.title}
-        description={article.excerpt}
+        description={article.content?.[0]?.text?.substring(0, 160) || ''}
+        image={article.imageUrl}
         path={`/article/${article.slug}`}
       />
 
-      <article className="animate-fade-in">
+      <article className="min-h-screen bg-surface pb-20">
         {/* Article Header */}
-        <header className="relative bg-gradient-to-br from-surface to-primary-fixed/30 border-b border-surface-container-low">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-            {/* Breadcrumb */}
-            <nav className="flex items-center gap-2 text-sm text-on-surface-variant mb-6">
-              <Link to="/" className="hover:text-primary transition-colors">Beranda</Link>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-              </svg>
-              <span className="text-outline line-clamp-1">{article.title}</span>
-            </nav>
-
-            {/* Category Tag */}
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold mb-4 ${PILLAR_TAG_COLORS[article.category] || ''}`}>
-              {pillar?.icon} {pillar?.name}
-            </span>
+        <header className="pt-24 lg:pt-32 pb-10 bg-surface-container-lowest border-b border-surface-container">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6">
+            {/* Category Breadcrumb */}
+            {pillar && (
+              <div className="flex items-center gap-3 mb-6">
+                <Link
+                  to={`/?category=${pillar.id}`}
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold font-brand transition-colors bg-${pillar.color}/10 text-${pillar.color} hover:bg-${pillar.color}/20`}
+                >
+                  <span className="text-base">{pillar.icon}</span>
+                  {pillar.name}
+                </Link>
+                <span className="w-1.5 h-1.5 rounded-full bg-border-muted"></span>
+                <span className="text-sm font-medium text-on-surface-variant flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px]">schedule</span>
+                  {formatReadingTime(article.readingTime)}
+                </span>
+              </div>
+            )}
 
             {/* Title */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-extrabold text-on-surface leading-tight mb-6">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-on-surface leading-tight mb-8">
               {article.title}
             </h1>
 
-            {/* Meta info */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mt-6">
-              
-              <div className="flex flex-col sm:flex-row flex-wrap sm:items-center gap-x-6 gap-y-4">
+            {/* Featured Image */}
+            {article.imageUrl && (
+              <figure className="mb-10 rounded-2xl overflow-hidden aspect-[21/9] bg-surface-container border border-surface-container shadow-sm">
+                <img
+                  src={article.imageUrl}
+                  alt={article.title}
+                  className="w-full h-full object-cover"
+                />
+              </figure>
+            )}
+
+            {/* Author & Reviewer Info */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-6 border-y border-surface-container bg-surface-container-lowest">
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
                 {/* Author */}
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Ditulis Oleh</span>
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-container to-tertiary-container flex items-center justify-center text-on-primary-container text-[10px] font-bold shadow-sm">
-                      {article.author?.charAt(0) || 'U'}
-                    </div>
+                    <span className="material-symbols-outlined text-primary text-[18px]">edit_document</span>
                     <span className="text-sm font-semibold text-on-surface">{article.author}</span>
                   </div>
                 </div>
 
-                <div className="hidden sm:block w-px h-8 bg-border-muted"></div>
-
                 {/* Reviewer */}
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Ditinjau Oleh</span>
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[18px]">verified_user</span>
-                    <span className="text-sm font-semibold text-on-surface">{article.reviewer || 'Tim Medis Senadee'}</span>
+                {article.reviewer && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Ditinjau Oleh</span>
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-secondary text-[18px]">stethoscope</span>
+                      <span className="text-sm font-semibold text-on-surface">dr. {article.reviewer}</span>
+                    </div>
                   </div>
-                </div>
-
-                <div className="hidden sm:block w-px h-8 bg-border-muted"></div>
+                )}
 
                 {/* Date */}
                 <div className="flex flex-col gap-1">
@@ -150,79 +198,12 @@ export default function ArticleDetailPage() {
         </header>
 
         {/* Article Body */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-          <div className="flex gap-10">
-            {/* Table of Contents - Sidebar (desktop) */}
-            <aside className="hidden lg:block w-64 flex-shrink-0">
-              <div className="sticky top-24">
-                <h4 className="font-heading font-semibold text-on-surface text-sm mb-4 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-primary-container">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                  </svg>
-                  Daftar Isi
-                </h4>
-                <nav id="table-of-contents" className="space-y-1">
-                  {article.content.map((section, index) => (
-                    <a
-                      key={index}
-                      href={`#section-${index}`}
-                      className={`block px-3 py-2 rounded-lg text-sm transition-all duration-200 border-l-2 ${
-                        activeSection === `section-${index}`
-                          ? 'text-primary bg-primary-fixed border-primary-container font-medium'
-                          : 'text-on-surface-variant hover:text-on-surface hover:bg-surface border-transparent'
-                      }`}
-                    >
-                      {section.heading}
-                    </a>
-                  ))}
-                </nav>
-              </div>
-            </aside>
-
-            {/* Main Content */}
-            <div className="flex-1 min-w-0 max-w-3xl">
-              {/* Mobile TOC */}
-              <details className="lg:hidden mb-8 rounded-2xl border border-surface-container bg-surface overflow-hidden group">
-                <summary className="px-5 py-4 cursor-pointer font-heading font-semibold text-on-surface text-sm flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-primary-container">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                    </svg>
-                    Daftar Isi
-                  </span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-outline group-open:rotate-180 transition-transform">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                  </svg>
-                </summary>
-                <nav className="px-5 pb-4 space-y-1">
-                  {article.content.map((section, index) => (
-                    <a
-                      key={index}
-                      href={`#section-${index}`}
-                      className="block px-3 py-2 rounded-lg text-sm text-on-surface-variant hover:text-primary hover:bg-primary-fixed transition-colors"
-                    >
-                      {section.heading}
-                    </a>
-                  ))}
-                </nav>
-              </details>
-
-              {/* Article Content */}
-              <div className="prose-custom">
-                {article.content.map((section, index) => (
-                  <section key={index} id={`section-${index}`} className="mb-10 scroll-mt-24">
-                    <h2 className="text-xl sm:text-2xl font-heading font-bold text-on-surface mb-4 flex items-start gap-3">
-                      <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary-fixed text-primary text-sm font-bold flex items-center justify-center mt-0.5">
-                        {index + 1}
-                      </span>
-                      {section.heading}
-                    </h2>
-                    <div className="text-on-surface font-body text-base sm:text-lg leading-relaxed whitespace-pre-line pl-11">
-                      {section.text}
-                    </div>
-                  </section>
-                ))}
-              </div>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+          <div className="flex-1 min-w-0">
+            {/* Article Content with Custom Markdown Renderer */}
+            <div className="prose-custom text-on-surface font-body text-base sm:text-lg leading-relaxed">
+              {renderMarkdown(fullMarkdown)}
+            </div>
 
               {/* Actionable Takeaways */}
               <TakeawaysBox takeaways={article.takeaways} />
@@ -297,20 +278,6 @@ export default function ArticleDetailPage() {
                 </div>
               )}
 
-              {!article.articleId && (
-                <div className="mt-10 pt-8 border-t border-surface-container">
-                  <button
-                    onClick={() => navigate(-1)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-brand font-bold text-on-surface-variant hover:text-primary hover:bg-primary-fixed border border-surface-container hover:border-primary-fixed transition-all cursor-pointer"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                    </svg>
-                    Kembali
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </article>
