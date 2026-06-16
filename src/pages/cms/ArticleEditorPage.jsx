@@ -492,14 +492,14 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
           </div>
 
           {/* AI Streaming Preview Overlay */}
-          {isGenerating && streamedText && (
+          {isGenerating && (
             <div className="bg-primary-fixed/30 border border-primary-container p-6 rounded-xl relative">
               <div className="flex items-center gap-2 mb-4 text-primary font-bold">
                 <span className="material-symbols-outlined animate-spin">sync</span>
                 AI Sedang Mengetik...
               </div>
-              <div className="prose-custom whitespace-pre-wrap text-on-surface font-body text-body-md opacity-80">
-                {streamedText}
+              <div className="prose-custom whitespace-pre-wrap text-on-surface font-body text-body-md opacity-80 min-h-[100px]">
+                {streamedText || 'Menghubungkan ke server AI...'}
               </div>
             </div>
           )}
