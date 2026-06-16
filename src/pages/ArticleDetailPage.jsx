@@ -5,6 +5,34 @@ import HumanVerifiedBadge from '../components/ui/HumanVerifiedBadge';
 import TakeawaysBox from '../components/ui/TakeawaysBox';
 import { getArticleBySlug, getPillarById, formatDate } from '../data/articles';
 import { formatReadingTime } from '../utils/readingTime';
+import { marked } from 'marked';
+
+marked.use({
+  renderer: {
+    heading(text, level) {
+      if (level === 2) return `<h2 class="text-xl sm:text-2xl font-heading font-bold text-on-surface mt-10 mb-4 flex items-start gap-3">${text}</h2>`;
+      if (level === 3) return `<h3 class="text-lg sm:text-xl font-heading font-bold text-on-surface mt-8 mb-3">${text}</h3>`;
+      return `<h${level}>${text}</h${level}>`;
+    },
+    paragraph(text) {
+      return `<p class="mb-6">${text}</p>`;
+    },
+    list(body, ordered) {
+      const listClass = ordered ? 'list-decimal' : 'list-disc';
+      const tag = ordered ? 'ol' : 'ul';
+      return `<${tag} class="${listClass} pl-6 mb-6 space-y-2">${body}</${tag}>`;
+    },
+    listitem(text) {
+      return `<li>${text}</li>`;
+    },
+    strong(text) {
+      return `<strong class="font-bold text-on-surface">${text}</strong>`;
+    },
+    em(text) {
+      return `<em class="italic">${text}</em>`;
+    }
+  }
+});
 
 export default function ArticleDetailPage() {
   const { slug } = useParams();
@@ -13,64 +41,6 @@ export default function ArticleDetailPage() {
 
   const article = useMemo(() => getArticleBySlug(slug), [slug]);
   const pillar = useMemo(() => article ? getPillarById(article.category) : null, [article]);
-
-  // Custom Markdown parser function
-  const renderMarkdown = (text) => {
-    if (!text) return null;
-    const blocks = text.split('\n\n');
-    return blocks.map((block, idx) => {
-      block = block.trim();
-      if (!block) return null;
-
-      // Handle Headings
-      if (block.startsWith('## ')) {
-        return <h2 key={idx} className="text-xl sm:text-2xl font-heading font-bold text-on-surface mt-10 mb-4 flex items-start gap-3">
-          {renderInlineElements(block.substring(3))}
-        </h2>;
-      }
-      if (block.startsWith('### ')) {
-        return <h3 key={idx} className="text-lg sm:text-xl font-heading font-bold text-on-surface mt-8 mb-3">
-          {renderInlineElements(block.substring(4))}
-        </h3>;
-      }
-
-      // Handle Lists
-      if (block.startsWith('- ') || block.startsWith('* ') || /^\d+\.\s/.test(block)) {
-        const isOrdered = /^\d+\.\s/.test(block);
-        const listItems = block.split('\n').filter(line => line.trim());
-        const ListTag = isOrdered ? 'ol' : 'ul';
-        const listClass = isOrdered ? 'list-decimal' : 'list-disc';
-        return (
-          <ListTag key={idx} className={listClass + " pl-6 mb-6 space-y-2"}>
-            {listItems.map((li, liIdx) => (
-              <li key={liIdx}>{renderInlineElements(li.replace(/^(?:[-*]|\d+\.)\s+/, ''))}</li>
-            ))}
-          </ListTag>
-        );
-      }
-
-      // Default Paragraph
-      return <p key={idx} className="mb-6">{renderInlineElements(block)}</p>;
-    });
-  };
-
-  const renderInlineElements = (text) => {
-    // Basic inline parser for bold and italic
-    const parts = text.split(/(\*{1,2}.*?\*{1,2}|<u\b[^>]*>.*?<\/u>)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={i} className="font-bold text-on-surface">{part.slice(2, -2)}</strong>;
-      }
-      if (part.startsWith('*') && part.endsWith('*')) {
-        return <em key={i} className="italic">{part.slice(1, -1)}</em>;
-      }
-      if (part.startsWith('<u>') && part.endsWith('</u>')) {
-        // Render <u> elements normally
-        return <u key={i} className="underline underline-offset-2 text-primary">{part.slice(3, -4)}</u>;
-      }
-      return part;
-    });
-  };
 
   // Combine sections back to a full markdown string
   const fullMarkdown = useMemo(() => {
@@ -201,8 +171,8 @@ export default function ArticleDetailPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="flex-1 min-w-0">
             {/* Article Content with Custom Markdown Renderer */}
-            <div className="prose-custom text-on-surface font-body text-base sm:text-lg leading-relaxed">
-              {renderMarkdown(fullMarkdown)}
+            <div className="prose-custom text-on-surface font-body text-base sm:text-lg leading-relaxed"
+                 dangerouslySetInnerHTML={{ __html: marked.parse(fullMarkdown) }}>
             </div>
 
               {/* Actionable Takeaways */}
