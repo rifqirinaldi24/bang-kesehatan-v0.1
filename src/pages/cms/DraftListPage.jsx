@@ -27,7 +27,7 @@ export default function DraftListPage() {
     // RBAC: If user is Writer, they can only see their own drafts
     let filteredDrafts = allDrafts;
     if (user?.role === 'Writer' || user?.role === 'writer') {
-      filteredDrafts = allDrafts.filter(a => a.author === user.name);
+      filteredDrafts = allDrafts.filter(a => a.author === user.name || (user.penName && a.author === user.penName));
     }
     
     setDrafts(filteredDrafts);
