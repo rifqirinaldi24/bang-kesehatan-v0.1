@@ -361,7 +361,7 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
         
         {/* --- LEFT COLUMN --- */}
         <div className="w-full lg:w-2/3 flex flex-col gap-6">
-          {!isModal && user?.role?.toLowerCase() !== 'writer' && (
+          {!isModal && (
             <div className="bg-surface-container-lowest rounded-xl border border-border-muted p-5 sm:p-6 lg:p-8 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-primary text-[24px]">smart_toy</span>
