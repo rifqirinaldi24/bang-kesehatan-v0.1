@@ -69,7 +69,35 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
   const [initialContent, setInitialContent] = useState('');
   const [currentContent, setCurrentContent] = useState('');
   const [referencesText, setReferencesText] = useState('');
+  const [faqText, setFaqText] = useState('');
   const [reviewer, setReviewer] = useState('');
+
+  // FAQ parsing helpers
+  const parseFaqText = (text) => {
+    if (!text) return [];
+    const lines = text.split('\n');
+    const faqs = [];
+    let currentQ = '';
+    let currentA = '';
+    for (const line of lines) {
+      if (line.toLowerCase().startsWith('q:')) {
+        if (currentQ) faqs.push({ question: currentQ.replace(/^q:\s*/i, '').trim(), answer: currentA.trim() });
+        currentQ = line;
+        currentA = '';
+      } else if (line.toLowerCase().startsWith('a:')) {
+        currentA = line.replace(/^a:\s*/i, '').trim();
+      } else if (currentQ) {
+        currentA += '\n' + line;
+      }
+    }
+    if (currentQ) faqs.push({ question: currentQ.replace(/^q:\s*/i, '').trim(), answer: currentA.trim() });
+    return faqs;
+  };
+
+  const formatFaqText = (faqs) => {
+    if (!faqs || !Array.isArray(faqs)) return '';
+    return faqs.map(f => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n');
+  };
 
   // Right column states
   const [publishMode, setPublishMode] = useState('now'); // 'now' or 'schedule'
@@ -100,6 +128,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
         setInitialContent(mdContent);
         setCurrentContent(mdContent);
         setReferencesText(articleToEdit.references || '');
+        setFaqText(formatFaqText(articleToEdit.faq || []));
         setReviewer(articleToEdit.reviewer || '');
         setIsVerified(articleToEdit.isVerified || false);
         setOriginalStatus(articleToEdit.status || '');
@@ -130,6 +159,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       status: 'draft',
       category: selectedCategory || 'general',
       references: referencesText,
+      faq: parseFaqText(faqText),
       imageUrl: imageUrl,
       content: markdownToSections(currentContent)
     };
@@ -189,6 +219,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       isVerified: true,
       imageUrl: imageUrl,
       references: referencesText,
+      faq: parseFaqText(faqText),
       content: markdownToSections(currentContent)
     };
     saveArticle(data);
@@ -241,7 +272,8 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       ];
       const model = genAI.getGenerativeModel({ model: "gemini-flash-latest", safetySettings });
 
-      const wordCountRule = articleType === 'general' ? 'Maksimal 500 - 600 kata' : 'Maksimal 350 - 400 kata';
+      const wordCountRule = articleType === 'general' ? 'Maksimal 600 - 1.000 kata (minimal 500 kata)' : 'Maksimal 400 - 700 kata (minimal 350 kata)';
+      const faqCountRule = articleType === 'general' ? '3-5 FAQ' : '2-3 FAQ';
 
       const prompt = `Anda adalah penulis medis/kesehatan Senior untuk portal "Senadee".
 Tugas Anda adalah menulis artikel kesehatan yang berbobot, akurat, empatik, dan mudah dipahami.
@@ -251,30 +283,38 @@ Topik (Keyword Utama): ${topic}
 Jenis Artikel: ${articleType.toUpperCase()}
 Instruksi Khusus (Brief): ${brief || 'Tidak ada'}
 
+VALIDASI SEARCH INTENT:
+Sebelum menulis, pahami apa yang sebenarnya ingin dicari pembaca dari keyword ini. Artikel Anda WAJIB menjawab 3 pertanyaan inti: 
+1) Apa yang ingin diketahui pembaca? 
+2) Apa tindakan yang bisa dilakukan pembaca? 
+3) Kapan pembaca perlu bantuan medis?
+
 ATURAN POINT OF VIEW (POV) & SAPAAN:
 1. Analisis target pembaca dari topik di atas. Siapa yang akan membacanya?
 2. Jika topik tentang Kehamilan, Bayi, atau Anak: Gunakan sapaan "Bunda" atau "Ayah" karena yang membaca adalah orang tuanya.
-3. Jika topik tentang Lansia/Geriatri: Gunakan sapaan "Anda" (diasumsikan yang membaca adalah anak/keluarga/caregiver dari lansia tersebut).
+3. Jika topik tentang Lansia/Geriatri: Analisis konteksnya. Jika ditujukan untuk keluarga/anak yang merawat, gunakan kalimat seperti "Jika Ayah atau Ibu mengalami...". Jika ditujukan untuk dibaca langsung oleh lansia, gunakan sapaan "Anda".
 4. Jika topik tentang Penyakit Medis Berat/Umum: Gunakan sapaan formal "Anda".
 5. Jika topik tentang Lifestyle, Diet Santai, atau Wellness: Gunakan sapaan "Kamu".
-6. DILARANG menggunakan kata "Bang" atau "Sobat Bang" di dalam artikel. Pertahankan tone profesional medis yang elegan.
+6. DILARANG menggunakan kata "Bang" atau "Sobat Bang".
 
 WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
-1. FOKUS & TO THE POINT: Jangan bertele-tele (ngalor ngidul). Bahas inti dari keyword saja.
-2. PANJANG ARTIKEL: ${wordCountRule}. Padat dan bergizi.
-3. PARAGRAF PENDEK: Tiap paragraf maksimal 2-3 kalimat (agar saat dibaca di mobile tidak lebih dari 3-4 baris).
-4. TANDA BACA: DILARANG KERAS menggunakan tanda dash panjang (—) di dalam kalimat.
-5. BAHASA: Gunakan bahasa Indonesia sesuai EYD. Tata bahasa formal tapi santai (enak dibaca, luwes, namun kredibel dan tidak menyepelekan).
-6. ISTILAH ASING: Pastikan semua kata/istilah bahasa Inggris atau bahasa Latin dicetak miring (gunakan format *italic*).
-7. FORMAT APLIKATIF: Gunakan *Bullet Points* atau *Numbering* jika sedang menjelaskan langkah-langkah, ciri-ciri, atau tips.
-8. STRUKTUR INTRO: Paragraf pertama wajib sangat menarik (hook), langsung ke inti masalah dari keyword, beri sedikit konteks, lalu segera masuk ke Subtitle pertama (H2).
-9. AKURASI MEDIS & REFERENSI: Info medis wajib 100% akurat dari sumber terpercaya (Kemenkes, WHO, Mayo Clinic, Cleveland Clinic, dll). Usia sumber tidak lebih dari 5 tahun ke belakang.
-10. DAFTAR REFERENSI: Di bagian paling bawah artikel, buat tulisan **Referensi:** lalu sebutkan sumbernya (tanpa link).
-11. CALL TO ACTION (DOKTER): Di paragraf penutup (ending), WAJIB arahkan pembaca untuk periksa ke dokter dengan menyebutkan kondisi *red flag*-nya (misal: "Segera konsultasikan ke dokter jika...").
-12. SEO FRIENDLY: Sebar *keyword* utama secara natural di paragraf awal, tengah, dan penutup.
-13. KODE ETIK MEDIS: Jangan menghakimi (non-judgemental, empati tinggi), dan WAJIB peringatkan agar tidak melakukan *self-diagnose*.
-14. ATURAN ARTIKEL HERBAL: Jika topik membahas obat herbal/alami, WAJIB tulis bahwa itu harus didukung penelitian ilmiah. Tegaskan herbal bukan pengobatan tunggal dan tetap butuh pantauan dokter (terutama untuk penyakit berat).
-15. FORMAT OUTPUT: HANYA gunakan format Markdown murni. Gunakan H2 (##) untuk subjudul utama. JANGAN gunakan H1 (#). JANGAN ketik kalimat pembuka/penutup basa-basi dari AI, langsung muntahkan isi artikelnya saja.`;
+1. PANJANG ARTIKEL: ${wordCountRule}.
+2. INTRODUCTION: Pada 100 kata pertama, Anda WAJIB memberikan jawaban singkat (40-60 kata) yang langsung menjawab keyword utama tanpa basa-basi. Intro ini berfungsi sebagai featured snippet Google.
+3. PARAGRAF PENDEK: Tiap paragraf maksimal 2-3 kalimat (agar saat dibaca di mobile tidak lebih dari 3-4 baris). Gunakan Bullet Points jika menjelaskan langkah/ciri-ciri.
+4. PENUTUP: Paragraf terakhir WAJIB berisi ringkasan singkat artikel dan bagian 'Kapan Perlu ke Dokter'. Sebutkan dengan jelas tanda-tanda bahaya/kondisi yang memerlukan evaluasi medis lanjutan, disertai ajakan konsultasi (Contoh: "Segera periksakan diri ke dokter jika Anda mengalami...").
+5. TANDA BACA & BAHASA: DILARANG KERAS menggunakan tanda dash panjang (—) di dalam kalimat. Gunakan koma atau titik dua. Pastikan semua istilah bahasa Inggris dicetak miring (*italic*).
+6. ANTI KEYWORD STUFFING: DILARANG mengulang keyword utama secara kaku dan berlebihan. Gunakan variasi kata yang natural.
+7. INTERNAL LINK MARKING: Setiap artikel hanya boleh menjawab 1 intent utama. Jika ada sebutan penyakit/topik lanjutan, jangan dijelaskan panjang lebar. Tandai frasa tersebut menggunakan tag HTML <u>...</u> sebagai rekomendasi internal link (Contoh: "Diabetes dapat memicu <u>komplikasi jantung</u>.").
+8. ANTI-HALUSINASI MEDIS: DILARANG KERAS mengarang statistik, hasil penelitian, kutipan dokter, atau referensi. Gunakan deskripsi kualitatif (contoh: "sebagian", "sering ditemukan") jika tidak ada data angka spesifik. Tulis "belum ada cukup bukti" jika bukti ilmiah terbatas.
+9. DISCLAIMER HERBAL: Jika topik membahas pengobatan herbal/alami, Anda WAJIB mencantumkan disclaimer ini persis: "Penggunaan herbal sebaiknya dikonsultasikan dengan dokter, terutama bila Anda memiliki penyakit kronis atau sedang mengonsumsi obat tertentu."
+
+STRUKTUR OUTPUT (PENTING!):
+Output Anda harus HANYA berisi Markdown murni tanpa basa-basi pembuka/penutup, terbagi dalam 3 bagian berurutan:
+1. [KONTEN ARTIKEL]: Isi artikel utama. Gunakan H2 (##) untuk subjudul. JANGAN gunakan H1 (#).
+2. [FAQ]: Di akhir artikel, buat judul **FAQ**. Buat ${faqCountRule} yang relevan (tidak mengulang isi artikel). Formatnya:
+   Q: [Pertanyaan]
+   A: [Jawaban 30-80 kata]
+3. [REFERENSI]: Di bawah FAQ, buat judul **Referensi:** lalu sebutkan sumbernya.`;
 
       setStreamedText('');
       
@@ -288,17 +328,25 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
 
       let mainContent = text;
       let refs = '';
-      const refMatch = text.match(/(?:\*\*)?Referensi:(?:\*\*)?\s*([\s\S]*)/i);
-
+      let rawFaq = '';
+      
+      const refMatch = mainContent.match(/(?:\*\*)?Referensi:(?:\*\*)?\s*([\s\S]*)/i);
       if (refMatch) {
-        mainContent = text.substring(0, refMatch.index).trim();
         refs = refMatch[1].trim();
+        mainContent = mainContent.substring(0, refMatch.index).trim();
+      }
+
+      const faqMatch = mainContent.match(/(?:\*\*)?FAQ(?:\*\*)?\s*\n([\s\S]*)/i);
+      if (faqMatch) {
+        rawFaq = faqMatch[1].trim();
+        mainContent = mainContent.substring(0, faqMatch.index).trim();
       }
 
       setTitle(topic);
       setSlug(topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
       setInitialContent(mainContent);
       setReferencesText(refs);
+      setFaqText(rawFaq);
       setHasGenerated(true);
     } catch (error) {
       console.error("Error generating content:", error);
@@ -543,6 +591,21 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
               onChange={(e) => setReferencesText(e.target.value)}
               rows="4"
               placeholder="1. World Health Organization. (2023). Diabetes...&#10;2. Mayo Clinic..."
+              className="w-full bg-surface border border-border-muted rounded-lg font-body-sm text-body-sm p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-y"
+            ></textarea>
+          </div>
+
+          {/* 8. FAQ */}
+          <div className="bg-surface-container-lowest p-5 rounded-xl border border-border-muted flex flex-col gap-2">
+            <div className="flex justify-between items-center">
+              <label className="font-label-md text-label-md font-bold text-on-surface">Frequently Asked Questions (FAQ)</label>
+              <span className="text-xs text-on-surface-variant px-2 py-1 bg-surface-container-low rounded-lg">Format: Q: ... A: ...</span>
+            </div>
+            <textarea
+              value={faqText}
+              onChange={(e) => setFaqText(e.target.value)}
+              rows="6"
+              placeholder="Q: Apakah diabetes bisa sembuh?&#10;A: Diabetes tidak bisa sembuh total, namun..."
               className="w-full bg-surface border border-border-muted rounded-lg font-body-sm text-body-sm p-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-y"
             ></textarea>
           </div>

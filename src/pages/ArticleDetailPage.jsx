@@ -10,6 +10,7 @@ export default function ArticleDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState(null);
+  const [openFaq, setOpenFaq] = useState(null);
 
   const article = useMemo(() => getArticleBySlug(slug), [slug]);
   const pillar = useMemo(() => article ? getPillarById(article.category) : null, [article]);
@@ -225,6 +226,55 @@ export default function ArticleDetailPage() {
 
               {/* Actionable Takeaways */}
               <TakeawaysBox takeaways={article.takeaways} />
+
+              {/* FAQ Accordion Card */}
+              {article.faq && article.faq.length > 0 && (
+                <div className="mt-12 bg-surface-container-lowest border border-surface-container shadow-sm rounded-2xl overflow-hidden">
+                  <div className="p-5 sm:p-6 border-b border-surface-container bg-surface-container-lowest">
+                    <h3 className="font-heading font-bold text-xl text-on-surface flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary">live_help</span>
+                      Frequently Asked Questions
+                    </h3>
+                  </div>
+                  <div className="divide-y divide-surface-container">
+                    {article.faq.map((item, idx) => (
+                      <div key={idx} className="group">
+                        <button
+                          onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                          className="w-full text-left px-5 sm:px-6 py-4 flex items-start justify-between gap-4 hover:bg-surface-container-lowest transition-colors cursor-pointer focus:outline-none focus:bg-surface-container-lowest"
+                        >
+                          <span className={`font-body-md font-bold transition-colors ${openFaq === idx ? 'text-primary' : 'text-on-surface'}`}>
+                            {item.question}
+                          </span>
+                          <span className={`material-symbols-outlined transition-transform duration-300 flex-shrink-0 ${openFaq === idx ? 'rotate-180 text-primary' : 'text-on-surface-variant'}`}>
+                            expand_more
+                          </span>
+                        </button>
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${openFaq === idx ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+                        >
+                          <div className="px-5 sm:px-6 pb-5 text-on-surface-variant font-body-md leading-relaxed">
+                            {item.answer}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* References */}
+              {article.references && (
+                <div className="mt-10 p-5 bg-surface-container-low rounded-2xl border border-surface-container">
+                  <h4 className="font-heading font-bold text-lg text-on-surface mb-3 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-on-surface-variant">book</span>
+                    Referensi
+                  </h4>
+                  <div className="text-sm text-on-surface-variant whitespace-pre-line font-body leading-relaxed pl-7 -indent-7">
+                    {article.references}
+                  </div>
+                </div>
+              )}
 
               {/* Article Reference ID (Opsi B) */}
               {article.articleId && (
