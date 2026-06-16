@@ -39,6 +39,8 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
 
   // Right column states
   const [publishMode, setPublishMode] = useState('now'); // 'now' or 'schedule'
+  
+  const authorName = user?.penName || user?.name || 'Unknown Writer';
   const [publishDate, setPublishDate] = useState('');
 
   const [toastMessage, setToastMessage] = useState('');
@@ -81,7 +83,8 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       ...(internalEditId ? { id: parseInt(internalEditId) } : {}),
       title: title || 'Untitled Draft',
       slug,
-      author: user?.name || 'Unknown Writer',
+      author: authorName,
+      reviewer: reviewer,
       status: 'draft',
       category: selectedCategory || 'general',
       content: initialContent ? [{ heading: 'Draft Content', text: 'MOCKED CONTENT' }] : []
@@ -133,7 +136,8 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       ...(internalEditId ? { id: parseInt(internalEditId) } : {}),
       title: title || 'Untitled Article',
       slug: slug || 'untitled-article',
-      author: user?.name || 'Unknown Writer',
+      author: authorName,
+      reviewer: reviewer,
       status: 'published',
       category: selectedCategory || 'general',
       readingTime: 5,
@@ -436,6 +440,17 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
 
           {/* 5. Text Box (Lexical Editor) */}
           <LexicalEditor initialContent={initialContent} />
+
+          {/* Author Name (Disabled) */}
+          <div className="bg-surface-container-lowest p-5 rounded-xl border border-border-muted flex flex-col gap-2">
+            <label className="font-label-md text-label-md font-bold text-on-surface">Ditulis Oleh (Penulis)</label>
+            <input
+              type="text"
+              value={authorName}
+              disabled
+              className="w-full bg-surface-dim border border-border-muted rounded-lg font-body-md text-body-md text-on-surface-variant p-3 outline-none cursor-not-allowed"
+            />
+          </div>
 
           {/* 6. Reviewer / Doctor Name */}
           <div className="bg-surface-container-lowest p-5 rounded-xl border border-border-muted flex flex-col gap-2">

@@ -30,6 +30,7 @@ const DEFAULT_SUPERUSER = {
   phone: '',
   avatar: '',
   bio: '',
+  penName: '',
   strNumber: '',
   linkedin: '',
   instagram: '',
@@ -66,7 +67,7 @@ export function getUserById(id) {
   return users.find(u => u.id === id) || null;
 }
 
-export function addUser({ name, email, password, role, title = '', phone = '', requirePasswordReset = true }) {
+export function addUser({ name, email, password, role, title = '', phone = '', requirePasswordReset = true, penName = '' }) {
   const users = getUsers();
 
   // Cek duplikat email
@@ -91,6 +92,7 @@ export function addUser({ name, email, password, role, title = '', phone = '', r
     phone,
     avatar: '',
     bio: '',
+    penName: role === 'writer' ? penName : '',
     strNumber: '',
     linkedin: '',
     instagram: '',
@@ -124,6 +126,10 @@ export function updateUser(id, updates) {
   // Hash password jika diupdate
   if (updates.password) {
     updates.password = hashPassword(updates.password);
+  }
+
+  if (updates.role && updates.role !== 'writer') {
+    updates.penName = '';
   }
 
   users[index] = { ...users[index], ...updates };

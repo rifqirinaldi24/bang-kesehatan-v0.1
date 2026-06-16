@@ -9,7 +9,7 @@ const ROLE_BADGES = {
   writer:    { bg: '#EDE9FE', color: '#5B21B6', label: 'Writer' },
 };
 
-const INITIAL_FORM = { name: '', email: '', password: '', role: 'writer', title: '', phone: '', requirePasswordReset: true };
+const INITIAL_FORM = { name: '', email: '', password: '', role: 'writer', title: '', phone: '', requirePasswordReset: true, penName: '' };
 
 export default function UserDirectoryPage() {
   const { user: currentUser } = useAuth();
@@ -73,6 +73,7 @@ export default function UserDirectoryPage() {
       role: user.role, 
       title: user.title || '', 
       phone: user.phone || '',
+      penName: user.penName || '',
       requirePasswordReset: user.requirePasswordReset || false
     });
     setFormError('');
@@ -101,6 +102,7 @@ export default function UserDirectoryPage() {
           role: form.role, 
           title: form.title, 
           phone: form.phone,
+          penName: form.penName,
           requirePasswordReset: form.requirePasswordReset
         };
         if (form.password.trim()) updates.password = form.password;
@@ -365,6 +367,16 @@ export default function UserDirectoryPage() {
                   <option value="writer">Writer</option>
                 </select>
               </div>
+
+              {form.role === 'writer' && (
+                <div>
+                  <label className="block font-label-md text-label-md font-semibold text-on-surface mb-1.5">Nama Penulis *</label>
+                  <input type="text" value={form.penName} onChange={(e) => setForm({...form, penName: e.target.value})}
+                    placeholder="Nama untuk ditampilkan pada artikel"
+                    required
+                    className="w-full px-4 py-2.5 bg-surface border border-border-muted rounded-xl font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
