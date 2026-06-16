@@ -3,16 +3,17 @@ import SEOHead from '../components/seo/SEOHead';
 import SearchBar from '../components/ui/SearchBar';
 import PillarNav from '../components/ui/PillarNav';
 import ArticleCard from '../components/ui/ArticleCard';
-import { articles, getFeaturedArticles, PILLARS } from '../data/articles';
+import { articles as hardcodedArticles, getFeaturedArticles, getAllPublishedArticles, PILLARS } from '../data/articles';
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState(null);
 
+  const allArticles = useMemo(() => getAllPublishedArticles(), []);
   const featuredArticles = useMemo(() => getFeaturedArticles(), []);
   const filteredArticles = useMemo(() => {
-    if (!activeCategory) return articles;
-    return articles.filter((a) => a.category === activeCategory);
-  }, [activeCategory]);
+    if (!activeCategory) return allArticles;
+    return allArticles.filter((a) => a.category === activeCategory);
+  }, [activeCategory, allArticles]);
 
   const nonFeaturedArticles = useMemo(() => {
     return filteredArticles.filter((a) => !a.isFeatured || activeCategory);

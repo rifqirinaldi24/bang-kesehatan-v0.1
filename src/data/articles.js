@@ -351,10 +351,22 @@ export function getArticlesByCategory(categoryId) {
 }
 
 /**
- * Get a single article by slug
+ * Get a single article by slug (searches both hardcoded and localStorage)
  */
 export function getArticleBySlug(slug) {
-  return articles.find((article) => article.slug === slug);
+  // First check hardcoded articles
+  const hardcoded = articles.find((article) => article.slug === slug);
+  if (hardcoded) return hardcoded;
+  
+  // Then check localStorage (CMS published articles)
+  try {
+    const stored = localStorage.getItem('senadee_articles');
+    if (stored) {
+      const allStored = JSON.parse(stored);
+      return allStored.find((a) => a.slug === slug && a.status === 'published');
+    }
+  } catch (e) { /* ignore parse errors */ }
+  return undefined;
 }
 
 /**
@@ -362,6 +374,25 @@ export function getArticleBySlug(slug) {
  */
 export function getFeaturedArticles() {
   return articles.filter((article) => article.isFeatured);
+}
+
+/**
+ * Get all published articles (hardcoded + CMS localStorage)
+ */
+export function getAllPublishedArticles() {
+  const hardcoded = articles.map(a => ({ ...a, status: 'published' }));
+  try {
+    const stored = localStorage.getItem('senadee_articles');
+    if (stored) {
+      const allStored = JSON.parse(stored);
+      const cmsPublished = allStored.filter(a => a.status === 'published');
+      // Merge: CMS articles override hardcoded ones with same id
+      const hardcodedIds = hardcoded.map(a => a.id);
+      const uniqueCms = cmsPublished.filter(a => !hardcodedIds.includes(a.id));
+      return [...hardcoded, ...uniqueCms];
+    }
+  } catch (e) { /* ignore parse errors */ }
+  return hardcoded;
 }
 
 /**
