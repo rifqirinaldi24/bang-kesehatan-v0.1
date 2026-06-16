@@ -10,7 +10,8 @@ import { AutoLinkNode, LinkNode } from '@lexical/link';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
-import { TRANSFORMERS } from '@lexical/markdown';
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
+import { TRANSFORMERS, $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown';
 import { CodeNode, CodeHighlightNode } from '@lexical/code';
 import { ImageNode } from './ImageNode';
 import LexicalToolbar from './LexicalToolbar';
@@ -46,8 +47,6 @@ function Placeholder() {
   return <div className="absolute top-[64px] left-8 text-outline-variant pointer-events-none">Start writing the medical article here...</div>;
 }
 
-import { $convertFromMarkdownString } from '@lexical/markdown';
-
 // Plugin to inject initial HTML or content if needed
 function InitialContentPlugin({ initialContent }) {
   const [editor] = useLexicalComposerContext();
@@ -62,7 +61,7 @@ function InitialContentPlugin({ initialContent }) {
   return null;
 }
 
-export default function LexicalEditor({ initialContent }) {
+export default function LexicalEditor({ initialContent, onChange }) {
   const initialConfig = {
     namespace: 'BangKesehatanEditor',
     theme,
@@ -96,6 +95,16 @@ export default function LexicalEditor({ initialContent }) {
           <LinkPlugin />
           <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
           <InitialContentPlugin initialContent={initialContent} />
+          {onChange && (
+            <OnChangePlugin
+              onChange={(editorState) => {
+                editorState.read(() => {
+                  const markdown = $convertToMarkdownString(TRANSFORMERS);
+                  onChange(markdown);
+                });
+              }}
+            />
+          )}
         </div>
       </LexicalComposer>
     </div>

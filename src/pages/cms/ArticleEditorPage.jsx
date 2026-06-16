@@ -10,6 +10,38 @@ import { getDoctors } from '../../data/doctorStore';
 import { addLog } from '../../data/logStore';
 import { useAuth } from '../../context/AuthContext';
 
+const markdownToSections = (markdown) => {
+  if (!markdown) return [];
+  const lines = markdown.split('\n');
+  const sections = [];
+  let currentHeading = '';
+  let currentText = [];
+
+  for (const line of lines) {
+    if (line.startsWith('#')) {
+      if (currentText.length > 0 || currentHeading) {
+        sections.push({ heading: currentHeading, text: currentText.join('\n').trim() });
+      }
+      currentHeading = line.replace(/^#+\s*/, '');
+      currentText = [];
+    } else {
+      currentText.push(line);
+    }
+  }
+  if (currentText.length > 0 || currentHeading) {
+    sections.push({ heading: currentHeading || 'Pendahuluan', text: currentText.join('\n').trim() });
+  }
+  return sections;
+};
+
+const sectionsToMarkdown = (sections) => {
+  if (!sections || !Array.isArray(sections)) return '';
+  return sections.map(s => {
+    const heading = (s.heading && s.heading !== 'Pendahuluan') ? `## ${s.heading}\n` : '';
+    return `${heading}${s.text || ''}`;
+  }).join('\n\n');
+};
+
 export default function ArticleEditorPage({ isModal = false, editId: propEditId = null, onClose }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -34,6 +66,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [initialContent, setInitialContent] = useState('');
+  const [currentContent, setCurrentContent] = useState('');
   const [referencesText, setReferencesText] = useState('');
   const [reviewer, setReviewer] = useState('');
 
@@ -61,7 +94,13 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
         setTopic(articleToEdit.title || '');
         setSelectedCategory(articleToEdit.category || '');
         setImageUrl(articleToEdit.imageUrl || null);
-        setInitialContent(articleToEdit.content ? JSON.stringify(articleToEdit.content) : ''); // Just mock load
+        const mdContent = sectionsToMarkdown(articleToEdit.content);
+        setInitialContent(mdContent);
+        setCurrentContent(mdContent);
+        setReferencesText(articleToEdit.references || '');
+        setReviewer(articleToEdit.reviewer || '');
+        setIsVerified(articleToEdit.isVerified || false);
+        setPublishMode(articleToEdit.status === 'scheduled' ? 'schedule' : 'now');
       }
     }
   }, [internalEditId]);
@@ -87,7 +126,9 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       reviewer: reviewer,
       status: 'draft',
       category: selectedCategory || 'general',
-      content: initialContent ? [{ heading: 'Draft Content', text: 'MOCKED CONTENT' }] : []
+      references: referencesText,
+      imageUrl: imageUrl,
+      content: markdownToSections(currentContent)
     };
     const saved = saveArticle(data);
     setInternalEditId(saved.id);
@@ -144,7 +185,8 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
       date: new Date().toISOString().split('T')[0],
       isVerified: true,
       imageUrl: imageUrl,
-      content: initialContent ? [{ heading: 'Published Content', text: 'MOCKED CONTENT' }] : []
+      references: referencesText,
+      content: markdownToSections(currentContent)
     };
     saveArticle(data);
     
@@ -439,7 +481,7 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
           </div>
 
           {/* 5. Text Box (Lexical Editor) */}
-          <LexicalEditor initialContent={initialContent} />
+          <LexicalEditor initialContent={initialContent} onChange={setCurrentContent} />
 
           {/* Author Name (Disabled) */}
           <div className="bg-surface-container-lowest p-5 rounded-xl border border-border-muted flex flex-col gap-2">
