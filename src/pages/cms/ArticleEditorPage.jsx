@@ -79,18 +79,19 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
     const faqs = [];
     let currentQ = '';
     let currentA = '';
-    for (const line of lines) {
-      if (line.toLowerCase().startsWith('q:')) {
-        if (currentQ) faqs.push({ question: currentQ.replace(/^q:\s*/i, '').trim(), answer: currentA.trim() });
+    for (let line of lines) {
+      line = line.trim();
+      if (/^(?:\*\*)?q(?:\*\*)?[:.]/i.test(line)) {
+        if (currentQ) faqs.push({ question: currentQ.replace(/^(?:\*\*)?q(?:\*\*)?[:.]\s*(?:\*\*)?/i, '').replace(/(?:\*\*)?$/, '').trim(), answer: currentA.trim() });
         currentQ = line;
         currentA = '';
-      } else if (line.toLowerCase().startsWith('a:')) {
-        currentA = line.replace(/^a:\s*/i, '').trim();
-      } else if (currentQ) {
+      } else if (/^(?:\*\*)?a(?:\*\*)?[:.]/i.test(line)) {
+        currentA = line.replace(/^(?:\*\*)?a(?:\*\*)?[:.]\s*(?:\*\*)?/i, '').replace(/(?:\*\*)?$/, '').trim();
+      } else if (currentQ && currentA !== '') {
         currentA += '\n' + line;
       }
     }
-    if (currentQ) faqs.push({ question: currentQ.replace(/^q:\s*/i, '').trim(), answer: currentA.trim() });
+    if (currentQ) faqs.push({ question: currentQ.replace(/^(?:\*\*)?q(?:\*\*)?[:.]\s*(?:\*\*)?/i, '').replace(/(?:\*\*)?$/, '').trim(), answer: currentA.trim() });
     return faqs;
   };
 
