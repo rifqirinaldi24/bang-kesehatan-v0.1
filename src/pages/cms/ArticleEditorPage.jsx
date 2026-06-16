@@ -64,6 +64,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
   
   // AI State
   const [isGenerating, setIsGenerating] = useState(false);
+  const [streamedText, setStreamedText] = useState('');
   const [hasGenerated, setHasGenerated] = useState(false);
   const [initialContent, setInitialContent] = useState('');
   const [currentContent, setCurrentContent] = useState('');
@@ -273,9 +274,15 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
 14. ATURAN ARTIKEL HERBAL: Jika topik membahas obat herbal/alami, WAJIB tulis bahwa itu harus didukung penelitian ilmiah. Tegaskan herbal bukan pengobatan tunggal dan tetap butuh pantauan dokter (terutama untuk penyakit berat).
 15. FORMAT OUTPUT: HANYA gunakan format Markdown murni. Gunakan H2 (##) untuk subjudul utama. JANGAN gunakan H1 (#). JANGAN ketik kalimat pembuka/penutup basa-basi dari AI, langsung muntahkan isi artikelnya saja.`;
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      setStreamedText('');
+      
+      const result = await model.generateContentStream(prompt);
+      let text = '';
+      for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        text += chunkText;
+        setStreamedText(text);
+      }
 
       let mainContent = text;
       let refs = '';
@@ -479,6 +486,19 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
               className="flex-1 bg-transparent border-b border-dashed border-outline-variant focus:border-primary focus:ring-0 p-0 text-on-surface-variant outline-none"
             />
           </div>
+
+          {/* AI Streaming Preview Overlay */}
+          {isGenerating && streamedText && (
+            <div className="bg-primary-fixed/30 border border-primary-container p-6 rounded-xl relative">
+              <div className="flex items-center gap-2 mb-4 text-primary font-bold">
+                <span className="material-symbols-outlined animate-spin">sync</span>
+                AI Sedang Mengetik...
+              </div>
+              <div className="prose-custom whitespace-pre-wrap text-on-surface font-body text-body-md opacity-80">
+                {streamedText}
+              </div>
+            </div>
+          )}
 
           {/* 5. Text Box (Lexical Editor) */}
           <LexicalEditor initialContent={initialContent} onChange={setCurrentContent} />
