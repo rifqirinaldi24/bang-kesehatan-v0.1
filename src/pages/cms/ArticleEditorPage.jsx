@@ -76,6 +76,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
   
   const authorName = user?.penName || user?.name || 'Unknown Writer';
   const [publishDate, setPublishDate] = useState('');
+  const [originalStatus, setOriginalStatus] = useState('');
 
   const [toastMessage, setToastMessage] = useState('');
 
@@ -101,6 +102,7 @@ export default function ArticleEditorPage({ isModal = false, editId: propEditId 
         setReferencesText(articleToEdit.references || '');
         setReviewer(articleToEdit.reviewer || '');
         setIsVerified(articleToEdit.isVerified || false);
+        setOriginalStatus(articleToEdit.status || '');
         setPublishMode(articleToEdit.status === 'scheduled' ? 'schedule' : 'now');
       }
     }
@@ -313,9 +315,11 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
           Batal
         </button>
       )}
-      <button onClick={handleSaveDraft} className="px-4 py-2 border border-border-muted text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
-        Save Draft
-      </button>
+      {originalStatus !== 'published' && (
+        <button onClick={handleSaveDraft} className="px-4 py-2 border border-border-muted text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+          Save Draft
+        </button>
+      )}
       <button
         onClick={handlePublish}
         disabled={!isVerified}
@@ -568,14 +572,15 @@ WAJIB PATUHI ATURAN EDITORIAL BERIKUT:
                   type="checkbox"
                   id="humanVerified"
                   checked={isVerified}
+                  disabled={user?.role?.toLowerCase() !== 'writer'}
                   onChange={(e) => setIsVerified(e.target.checked)}
-                  className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-border-muted appearance-none cursor-pointer z-10 transition-transform duration-200"
-                  style={isVerified ? { right: 0, borderColor: '#006a69' } : {}}
+                  className={`toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none z-10 transition-transform duration-200 ${user?.role?.toLowerCase() !== 'writer' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer border-border-muted'}`}
+                  style={isVerified ? { right: 0, borderColor: user?.role?.toLowerCase() !== 'writer' ? '#ccc' : '#006a69' } : {}}
                 />
                 <label
                   htmlFor="humanVerified"
-                  className="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors"
-                  style={isVerified ? { backgroundColor: '#0ea5a4' } : { backgroundColor: '#e2e7ff' }}
+                  className={`toggle-label block overflow-hidden h-6 rounded-full transition-colors ${user?.role?.toLowerCase() !== 'writer' ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                  style={isVerified ? { backgroundColor: user?.role?.toLowerCase() !== 'writer' ? '#999' : '#0ea5a4' } : { backgroundColor: '#e2e7ff' }}
                 ></label>
               </div>
             </div>
