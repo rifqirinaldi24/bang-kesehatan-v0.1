@@ -8,7 +8,6 @@ const STORAGE_KEY = 'bk_permissions';
 
 // Daftar permission dasar (selain menu)
 const BASE_PERMISSIONS = [
-  { key: 'ai_generator',  label: 'AI Generator',     icon: 'auto_awesome',   description: 'Menggunakan AI untuk generate artikel' },
   { key: 'publish',       label: 'Publish Artikel',  icon: 'publish',        description: 'Mempublikasikan artikel ke website' },
   { key: 'analytics',     label: 'Analytics',        icon: 'bar_chart',      description: 'Melihat data analytics dan traffic' }
 ];
@@ -35,10 +34,10 @@ export function getAllAvailablePermissions() {
 
 // Default permission matrix
 const DEFAULT_MATRIX = {
-  superuser: ['dashboard', 'editor', 'ai_generator', 'publish', 'analytics', 'manage_users', 'manage_roles', 'settings'],
-  admin:     ['dashboard', 'editor', 'ai_generator', 'publish', 'analytics', 'manage_users', 'manage_doctors'],
-  editor:    ['dashboard', 'editor', 'ai_generator', 'publish'],
-  writer:    ['dashboard', 'editor', 'ai_generator'],
+  superuser: ['dashboard', 'editor', 'publish', 'analytics', 'manage_users', 'manage_roles', 'settings'],
+  admin:     ['dashboard', 'editor', 'publish', 'analytics', 'manage_users', 'manage_doctors'],
+  editor:    ['dashboard', 'editor', 'publish'],
+  writer:    ['dashboard', 'editor'],
 };
 
 // Inisialisasi permission matrix
